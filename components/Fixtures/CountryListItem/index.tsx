@@ -1,0 +1,101 @@
+"use client";
+
+import { Disclosure } from "@headlessui/react";
+
+import { Fixture } from "@/typings";
+import { sportmonksCountries } from "@/utils/Sportmonks/Countries";
+import { leagueOrder } from "@/utils/LeagueOrder";
+
+import FixturesLeagueList from "../../Shared/FixturesLeagueList";
+import { useFixturesContext } from "@/hooks/useFixturesContext";
+import Image from "next/image";
+
+const CountryListItem = () => {
+  const { fixtures, isLoading } = useFixturesContext();
+
+  const displayCountries = () => {
+    if (!fixtures) return;
+
+    const todaysFixtures = fixtures.reduce((prevArr: any, fixture: Fixture) => {
+      const countryObj = sportmonksCountries.find(
+        (country): boolean => country.id === fixture.league.country_id
+      );
+
+      if (countryObj) {
+        const countryName: string = countryObj.name;
+
+        prevArr[countryName] = prevArr[countryName] || {
+          ...countryObj,
+        };
+      }
+
+      return prevArr;
+    }, {});
+
+    const sortedFixtures: any = {};
+
+    leagueOrder.forEach((country) => {
+      if (todaysFixtures.hasOwnProperty(country.country)) {
+        sortedFixtures[country.country] = {
+          ...todaysFixtures[country.country],
+        };
+      }
+    });
+
+    return (
+      <>
+        {!isLoading ? (
+          <>
+            {fixtures ? (
+              Object.keys(sortedFixtures).map((countryKey: string) => (
+                <Disclosure key={countryKey}>
+                  <div className="mb-1 bg-[#3F576C] overflow-hidden">
+                    <Disclosure.Button className="p-2 md:p-4 flex items-center w-full gap-4 rounded-lg bg-[#3F576C]">
+                      <div
+                        className={`relative h-[25px] w-[25px] md:h-[30px] md:w-[30px] rounded-2xl overflow-hidden`}
+                      >
+                        <Image
+                          src={
+                            sortedFixtures[countryKey].image_path
+                              ? sortedFixtures[countryKey].image_path
+                              : "default-team-logo.svg"
+                          }
+                          fill={true}
+                          alt="Country flag"
+                          style={{ objectFit: "cover" }}
+                          sizes={`(max-width: 1200px) 30px, 30px`}
+                        />
+                      </div>
+                      <h2 className="md:text-lg">{countryKey}</h2>
+                    </Disclosure.Button>
+                    <Disclosure.Panel>
+                      <FixturesLeagueList
+                        countryId={sortedFixtures[countryKey].id}
+                        fixtures={fixtures}
+                      />
+                    </Disclosure.Panel>
+                  </div>
+                </Disclosure>
+              ))
+            ) : (
+              <div>Can not retrieve fixtures</div>
+            )}
+          </>
+        ) : (
+          <>
+            {Array.from({ length: 10 }).map((item, index) => (
+              <div
+                key={index}
+                className="bg-[#3f576c] animate-pulse h-[41px] md:h-[62px] w-full mb-1"
+              ></div>
+            ))}
+          </>
+        )}
+      </>
+    );
+  };
+
+  return displayCountries();
+};
+
+export default CountryListItem;
