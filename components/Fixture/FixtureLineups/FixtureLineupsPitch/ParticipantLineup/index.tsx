@@ -15,17 +15,35 @@ function ParticipantLineup({ lineup, isHomeTeam }: Props) {
 
   const displayFormation = () => {
     const formationMetadata = metadata.find((meta) => meta.type_id === 159);
-    const formation: number[] = isHomeTeam
-      ? formationMetadata?.values.home.split("-")
-      : formationMetadata?.values.away.split("-");
 
-    lineup.sort((a, b) => a.formation_position - b.formation_position);
+    const formationValue = isHomeTeam
+      ? formationMetadata?.values.home
+      : formationMetadata?.values.away;
 
-    const teamLineup = [];
-    teamLineup.push(lineup.splice(0, 1));
+    // Sportmonks omits formation metadata for some fixtures.
+    if (!formationValue) return null;
+
+    const formation: number[] = formationValue
+      .split("-")
+      .map((pos: string) => Number(pos));
+
+    /*
+      Work on a copy. This used to sort and splice the `lineup` prop in place,
+      draining the caller's array as a side effect of rendering. React 19
+      double-invokes render functions in development, so the second invocation
+      received the already-emptied array and drew an empty pitch.
+    */
+    const remaining = [...lineup].sort(
+      (a, b) => a.formation_position - b.formation_position
+    );
+
+    const teamLineup: Player[][] = [];
+
+    // Goalkeeper first, then one row per line of the formation.
+    teamLineup.push(remaining.splice(0, 1));
 
     formation.forEach((pos) => {
-      teamLineup.push(lineup.splice(0, pos));
+      teamLineup.push(remaining.splice(0, pos));
     });
 
     const kitColour = isHomeTeam

@@ -7,7 +7,7 @@ import { getErrorMessage, isAbortError, postJson } from "@/services/Api";
 import {
   Detail,
   Fixture,
-  FixtureTable,
+  FixtureTable as LeagueTable,
   Participant,
   Rule,
   Standing,
@@ -28,12 +28,12 @@ type FixtureTableProps = {
 */
 const buildLeague = (
   response: Standing[],
-  leagues: FixtureTable[],
+  leagues: LeagueTable[],
   participant: Standing,
   competitionName: string
-): FixtureTable | null => {
+): LeagueTable | null => {
   // Already built for this stage.
-  if (leagues.some((item: FixtureTable) => item.id === participant.stage_id))
+  if (leagues.some((item: LeagueTable) => item.id === participant.stage_id))
     return null;
 
   const groupName: string = participant.group
@@ -58,7 +58,7 @@ const buildLeague = (
 };
 
 function FixtureTable({ fixture }: FixtureTableProps) {
-  const [fixtureTableData, setFixtureTableData] = useState<FixtureTable[]>([]);
+  const [fixtureTableData, setFixtureTableData] = useState<LeagueTable[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -91,7 +91,7 @@ function FixtureTable({ fixture }: FixtureTableProps) {
             item.participant.id === awayTeamId
         );
 
-        const leagues: FixtureTable[] = [];
+        const leagues: LeagueTable[] = [];
 
         participantEntries.forEach((participantEntry: Standing) => {
           const newLeague = buildLeague(

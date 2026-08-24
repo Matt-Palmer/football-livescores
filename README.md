@@ -1,6 +1,6 @@
 # Football Livescores
 
-A live football scores app built with Next.js (App Router) and the
+A live football scores app built with Next.js 16 (App Router, React 19) and the
 [Sportmonks Football API v3](https://docs.sportmonks.com/football).
 
 - **Home** — today's fixtures, grouped by country and competition, with scores
@@ -84,4 +84,4 @@ once the match is complete.
 | `npm run dev` | Start the development server |
 | `npm run build` | Production build |
 | `npm start` | Serve a production build |
-| `npm run lint` | Lint the project |
+| `npm run lint` | Lint the project (ESLint 9 flat config) |
