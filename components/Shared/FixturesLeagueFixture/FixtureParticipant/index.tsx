@@ -1,7 +1,6 @@
 import { isComplete, isInplay } from "@/services/MatchStates";
 import { Fixture, Participant } from "@/typings";
 import { getParticipant } from "@/services/Participants";
-import Logo from "../../Logo/Logo";
 import { capitalizeFirstLetter } from "@/utils/helperFunctions";
 import Image from "next/image";
 
@@ -69,7 +68,7 @@ function FixtureParticipant({ fixture, location }: Props) {
             src={
               participant.image_path
                 ? participant.image_path
-                : "default-team-logo.svg"
+                : "/default-team-logo.svg"
             }
             fill={true}
             alt="Country flag"

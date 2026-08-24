@@ -1,47 +1,39 @@
-import { getFetchUrl } from "@/utils/getFetchUrls";
-import { getTodaysDate } from "../Date";
+import { postJson } from "@/services/Api";
+import { getTodaysDate } from "@/services/Date";
+import { isInplay } from "@/services/MatchStates";
 import { Fixture } from "@/typings";
 
-const fixtureInPlayStatesIds = [2, 3, 4, 6, 9, 16, 21, 22, 23, 25];
+/** Today's fixtures, in the viewer's timezone. Throws ApiError on failure. */
+export const getFixtures = async (signal?: AbortSignal): Promise<Fixture[]> => {
+  const fixtures = await postJson<Fixture[]>(
+    "GetFixtures",
+    { todaysDate: getTodaysDate() },
+    signal
+  );
 
-export const getFixtures = async () => {
-  const date = getTodaysDate();
-
-  try {
-    const result = await fetch(getFetchUrl("api/GetFixtures"), {
-      method: "POST",
-      body: JSON.stringify({
-        todaysDate: date,
-      }),
-    });
-
-    const response = await result.json();
-
-    return response;
-  } catch (error) {
-    console.error(error);
-  }
+  return Array.isArray(fixtures) ? fixtures : [];
 };
 
 export const areFixturesInPlay = (fixtures: Fixture[]): boolean => {
-  const inPlayFixtures = fixtures.filter((fixture: Fixture) =>
-    fixtureInPlayStatesIds.includes(fixture.state_id)
-  );
-
-  if (inPlayFixtures.length > 0) return true;
-
-  return false;
+  return fixtures.some(isInplay);
 };
 
-export const updateFixtures = (updatedFixturesState: Fixture[], currentFixturesState: Fixture[]): Fixture[] => {
-  const newState = [...currentFixturesState];
+/**
+ * Merges a freshly polled list into the list already on screen.
+ *
+ * Keyed by id, so a fixture missing from the update keeps its current values
+ * instead of being dropped, and a fixture that is new to the update is added
+ * rather than silently discarded. The previous version wrote to
+ * `newState[-1]` whenever the poll returned a fixture the UI had not seen,
+ * which appended a junk entry under a numeric "-1" key.
+ */
+export const updateFixtures = (
+  updated: Fixture[],
+  current: Fixture[]
+): Fixture[] => {
+  const merged = new Map(current.map((fixture) => [fixture.id, fixture]));
 
-  updatedFixturesState.forEach((item: Fixture) => {
-    const fixtureIndex = newState.findIndex(
-      (fixture: Fixture) => fixture.id === item.id
-    );
-    newState[fixtureIndex] = item;
-  });
-  
-  return newState;
+  updated.forEach((fixture) => merged.set(fixture.id, fixture));
+
+  return Array.from(merged.values());
 };

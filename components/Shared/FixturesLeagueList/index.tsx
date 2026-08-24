@@ -43,7 +43,7 @@ const FixturesLeagueList = ({ countryId, fixtures }: Props) => {
                     src={
                       todaysFixturesNew[leagueKey].image_path
                         ? todaysFixturesNew[leagueKey].image_path
-                        : "default-team-logo.svg"
+                        : "/default-team-logo.svg"
                     }
                     fill={true}
                     alt="Country flag"

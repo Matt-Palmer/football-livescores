@@ -3,7 +3,6 @@ import Image from "next/image";
 import { Fixture, Participant } from "@/typings";
 import { sportmonksCountries } from "@/utils/Sportmonks/Countries";
 import ScoreDisplay from "./ScoreDisplay";
-import Logo from "@/components/Shared/Logo/Logo";
 
 type FixtureInformationProps = {
   fixture: Fixture;
@@ -30,7 +29,7 @@ function FixtureInformation({fixture}: FixtureInformationProps) {
 
     if (team) return team.image_path;
 
-    return "default-team-logo.svg";
+    return "/default-team-logo.svg";
   };
 
   return (
@@ -42,7 +41,7 @@ function FixtureInformation({fixture}: FixtureInformationProps) {
               src={
                 fixture.league.image_path
                   ? fixture.league.image_path
-                  : "default-team-logo.svg"
+                  : "/default-team-logo.svg"
               }
               fill={true}
               alt="Competition logo"

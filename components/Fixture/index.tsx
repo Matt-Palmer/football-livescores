@@ -27,11 +27,22 @@ function TabTitle({ title }: TabTitleProps) {
 }
 
 export default function FixtureComponent() {
-  const { fixture } = useFixtureContext();
+  const { fixture, isLoading, error, retry } = useFixtureContext();
 
   return (
     <main className="flex flex-col w-full overflow-x-hidden px-4 mx-auto mb-16">
-      {fixture ? (
+      {error ? (
+        <div className="text-center py-12">
+          <p className="mb-2">Couldn&apos;t load this fixture.</p>
+          <p className="text-sm text-[rgba(255,255,255,0.6)] mb-6">{error}</p>
+          <button
+            onClick={retry}
+            className="bg-[#EFEF3E] text-black px-6 py-2 rounded-full"
+          >
+            Try again
+          </button>
+        </div>
+      ) : fixture ? (
         <>
           <FixtureInformation fixture={fixture} />
 
@@ -94,8 +105,10 @@ export default function FixtureComponent() {
             </Tab.Panels>
           </Tab.Group>
         </>
-      ) : (
-        false
+      ) : isLoading ? null : (
+        <div className="text-center py-12 text-[rgba(255,255,255,0.6)]">
+          Fixture not found.
+        </div>
       )}
     </main>
   );

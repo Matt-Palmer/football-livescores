@@ -2,10 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { db } from "@/services/Firebase";
-import { doc, getDoc, setDoc } from "firebase/firestore";
-
-import { getFetchUrl } from "@/utils/getFetchUrls";
+import { getErrorMessage, isAbortError, postJson } from "@/services/Api";
 import { Fixture, League, Participant } from "@/typings";
 import FixturesLeagueList from "../../Shared/FixturesLeagueList";
 
@@ -17,32 +14,49 @@ type FixtureHead2HeadProps = {
 function FixtureHead2Head({ participants, league }: FixtureHead2HeadProps) {
   const [previousFixtures, setPreviousFixtures] = useState<Fixture[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  /*
+    Head-to-head history depends only on which two teams are playing, and that
+    cannot change for a given fixture. Keying the effect on the two ids means
+    the parent's five-second poll re-renders this component without refetching
+    a result that is identical every time.
+  */
+  const homeTeamId = participants.find(
+    (participant) => participant.meta.location === "home"
+  )?.id;
+  const awayTeamId = participants.find(
+    (participant) => participant.meta.location === "away"
+  )?.id;
 
   useEffect(() => {
-    const getHead2HeadData = async () => {
-      const homeTeamId = participants.find(
-        (participant) => participant.meta.location === "home"
-      );
-      const awayTeamId = participants.find(
-        (participant) => participant.meta.location === "away"
-      );
+    if (!homeTeamId || !awayTeamId) {
+      setIsLoading(false);
+      return;
+    }
 
-      const result = await fetch(getFetchUrl(`api/Fixture/Head2Head`), {
-        method: "POST",
-        body: JSON.stringify({
-          home_team_id: `${homeTeamId?.id}`,
-          away_team_id: `${awayTeamId?.id}`,
-        }),
+    const controller = new AbortController();
+
+    postJson<Fixture[]>(
+      "Fixture/Head2Head",
+      { home_team_id: `${homeTeamId}`, away_team_id: `${awayTeamId}` },
+      controller.signal
+    )
+      .then((response) => {
+        setPreviousFixtures(Array.isArray(response) ? response : []);
+        setError(null);
+      })
+      .catch((cause) => {
+        if (isAbortError(cause)) return;
+
+        setError(getErrorMessage(cause));
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setIsLoading(false);
       });
 
-      const response = await result.json();
-
-      setPreviousFixtures(response);
-      setIsLoading(false);
-    };
-
-    getHead2HeadData();
-  }, []);
+    return () => controller.abort();
+  }, [homeTeamId, awayTeamId]);
 
   const getSummary = () => {
     let homeTeamWins = 0;
@@ -146,12 +160,17 @@ function FixtureHead2Head({ participants, league }: FixtureHead2HeadProps) {
     <>
       {!isLoading ? (
         <>
-          {previousFixtures.length > 0 ? (
+          {error ? (
+            <div className="text-center py-8">
+              <p className="mb-1">Couldn&apos;t load head-to-head data.</p>
+              <p className="text-sm text-[rgba(255,255,255,0.6)]">{error}</p>
+            </div>
+          ) : previousFixtures.length > 0 ? (
             <div className="flex flex-col-reverse lg:flex-row w-full max-w-[600px] lg:max-w-[900px] lg:gap-8 m-auto">
               <div className="w-full flex-1">
                 <FixturesLeagueList
                   countryId={league.country_id}
-                  fixtures={previousFixtures.splice(0, 5)}
+                  fixtures={previousFixtures.slice(0, 5)}
                 />
               </div>
 

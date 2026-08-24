@@ -1,13 +1,20 @@
 "use client";
 
+import React, { createContext, useCallback, useEffect, useRef, useState } from "react";
+
+import { getErrorMessage, isAbortError, postJson } from "@/services/Api";
 import { isComplete, isInplay } from "@/services/MatchStates";
 import { Fixture } from "@/typings";
-import { getFetchUrl } from "@/utils/getFetchUrls";
-import React, { createContext, useEffect, useRef, useState } from "react";
+
+const POLL_INTERVAL_MS = 5000;
+const CLOCK_INTERVAL_MS = 1000;
 
 type FixtureContextType = {
   fixture: Fixture | null;
   isFixtureInPlay: boolean;
+  isLoading: boolean;
+  error: string | null;
+  retry: () => void;
 };
 
 type FixtureContextProviderType = {
@@ -22,74 +29,105 @@ export default function FixtureContextProvider({
   children,
 }: FixtureContextProviderType) {
   const [fixture, setFixture] = useState<Fixture | null>(null);
-  const [isFixtureInPlay, setIsFixtureInPlay] = useState<boolean>(true);
+  const [isFixtureInPlay, setIsFixtureInPlay] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState<number>(0);
 
-  let fixtureRef = useRef<any>();
-  let clock = useRef<number>();
+  /*
+    The polling interval is created once per fixture id, so it must not close
+    over `fixture` or `isFixtureInPlay` directly — those values would be
+    frozen at the moment the interval was created. Refs give the callback a
+    live view instead.
 
+    This also keeps `isFixtureInPlay` out of the effect dependencies. It used
+    to be listed there, which meant every kickoff and final whistle destroyed
+    and rebuilt the interval, firing an extra request each time.
+  */
+  const fixtureRef = useRef<Fixture | null>(null);
+  fixtureRef.current = fixture;
+
+  const isInPlayRef = useRef<boolean>(isFixtureInPlay);
+  isInPlayRef.current = isFixtureInPlay;
+
+  const retry = useCallback(() => {
+    setError(null);
+    setIsLoading(true);
+    setReloadKey((key) => key + 1);
+  }, []);
+
+  // Initial load, and any explicit retry.
   useEffect(() => {
     const controller = new AbortController();
-    const signal = controller.signal;
-    let updateFixtureInterval: NodeJS.Timer;
-    let clockIntervalTimer: NodeJS.Timer;
 
-    const getFixture = async (signal: AbortSignal) => {
-      try {
-        const result = await fetch(getFetchUrl(`api/Fixture/`), {
-          method: "POST",
-          body: JSON.stringify({
-            id: id,
-          }),
+    postJson<Fixture>("Fixture", { id }, controller.signal)
+      .then((response) => {
+        setFixture(response);
+        setIsFixtureInPlay(isInplay(response));
+        setError(null);
+      })
+      .catch((cause) => {
+        if (isAbortError(cause)) return;
+
+        setError(getErrorMessage(cause));
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setIsLoading(false);
+      });
+
+    // The signal is now actually passed to the request. The previous version
+    // built an AbortController, threaded the signal through a helper, and
+    // never handed it to fetch, so nothing was ever cancelled.
+    return () => controller.abort();
+  }, [id, reloadKey]);
+
+  // Live polling while the match is in play.
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const poll = () => {
+      if (!isInPlayRef.current) return;
+
+      postJson<Fixture>("Fixture", { id }, controller.signal)
+        .then((response) => {
+          setFixture(response);
+
+          if (isComplete(response) && response.result_info) {
+            setIsFixtureInPlay(false);
+          }
+        })
+        .catch((cause) => {
+          if (!isAbortError(cause)) console.error("[poll]", cause);
         });
-
-        const response = await result.json();
-
-        return response;
-      } catch (error) {
-        console.error(error);
-      }
     };
 
-    getFixture(signal).then((response) => {
-      setIsFixtureInPlay(isInplay(response));
-
-      setFixture(response);
-
-      fixtureRef.current = response;
-
-      if (!isComplete(response)) {
-        clockIntervalTimer = setInterval(() => {
-          clock.current = Date.now() / 1000;
-          if (
-            !isFixtureInPlay &&
-            clock.current >= fixtureRef.current.starting_at_timestamp
-          ) {
-            setIsFixtureInPlay(true);
-          }
-        }, 1000);
-      }
-    });
-
-    if (isFixtureInPlay) {
-      updateFixtureInterval = setInterval(() => {
-        getFixture(signal).then((response) => {
-          if (isComplete(response) && response.result_info)
-            setIsFixtureInPlay(false);
-
-          setFixture(response);
-        });
-      }, 5000);
-    }
+    const pollTimer = setInterval(poll, POLL_INTERVAL_MS);
 
     return () => {
-      clearInterval(updateFixtureInterval);
-      clearInterval(clockIntervalTimer);
+      clearInterval(pollTimer);
       controller.abort();
     };
-  }, [id, isFixtureInPlay]);
+  }, [id]);
+
+  // Starts polling when a fixture that has not finished reaches kickoff.
+  useEffect(() => {
+    const clockTimer = setInterval(() => {
+      const current = fixtureRef.current;
+
+      if (!current || isInPlayRef.current || isComplete(current)) return;
+
+      if (Date.now() / 1000 >= current.starting_at_timestamp) {
+        setIsFixtureInPlay(true);
+      }
+    }, CLOCK_INTERVAL_MS);
+
+    return () => clearInterval(clockTimer);
+  }, []);
 
   return (
-    <FixtureContext.Provider value={{ fixture, isFixtureInPlay }}>
+    <FixtureContext.Provider
+      value={{ fixture, isFixtureInPlay, isLoading, error, retry }}
+    >
       {children}
     </FixtureContext.Provider>
   );

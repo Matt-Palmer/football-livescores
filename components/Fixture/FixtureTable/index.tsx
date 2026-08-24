@@ -3,10 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 
-import { db } from "@/services/Firebase";
-import { doc, getDoc, setDoc } from "firebase/firestore";
-
-import { getFetchUrl } from "@/utils/getFetchUrls";
+import { getErrorMessage, isAbortError, postJson } from "@/services/Api";
 import {
   Detail,
   Fixture,
@@ -21,108 +18,106 @@ type FixtureTableProps = {
   fixture: Fixture;
 };
 
+/*
+  Groups the standings rows that belong to the same stage (and group, where a
+  competition has them) as the given participant.
+
+  Hoisted out of the component so it is a stable reference: as an inner
+  function it was recreated on every render, which is why the effect below had
+  to omit it from its dependencies to avoid refetching on every poll.
+*/
+const buildLeague = (
+  response: Standing[],
+  leagues: FixtureTable[],
+  participant: Standing,
+  competitionName: string
+): FixtureTable | null => {
+  // Already built for this stage.
+  if (leagues.some((item: FixtureTable) => item.id === participant.stage_id))
+    return null;
+
+  const groupName: string = participant.group
+    ? " - " + participant.group.name
+    : "";
+
+  let leagueEntries: Standing[] = response.filter(
+    (leagueEntry: Standing) => leagueEntry.stage_id === participant.stage_id
+  );
+
+  if (participant.group_id !== null) {
+    leagueEntries = leagueEntries.filter(
+      (leagueEntry: Standing) => leagueEntry.group_id === participant.group_id
+    );
+  }
+
+  return {
+    name: competitionName + groupName,
+    id: participant.stage_id,
+    standings: leagueEntries,
+  };
+};
+
 function FixtureTable({ fixture }: FixtureTableProps) {
   const [fixtureTableData, setFixtureTableData] = useState<FixtureTable[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  /*
+    A league table does not change during a match, so this is keyed on the
+    season and the two teams rather than on the fixture object. The parent
+    re-renders every five seconds while a match is live; without this the
+    standings would be refetched on every one of those polls.
+  */
+  const seasonId = fixture.season_id;
+  const competitionName = fixture.league.name;
+  const homeTeamId = getParticipant(fixture.participants, "home")?.id;
+  const awayTeamId = getParticipant(fixture.participants, "away")?.id;
 
   useEffect(() => {
-    const getLeagueData = async () => {
-      // FETCH STANDINGS
-      // Fetch the 'standings' for the current season from the API.
-      const result = await fetch(
-        getFetchUrl(`api/Season/${fixture.season_id}`),
-        {
-          method: "POST",
-          body: JSON.stringify({
-            seasonId: `${fixture.season_id}`,
-          }),
-        }
-      );
+    const controller = new AbortController();
 
-      // Wait for the response from the API call.
-      const response: Standing[] = await result.json();
+    postJson<Standing[]>(
+      `Season/${seasonId}`,
+      { seasonId: `${seasonId}` },
+      controller.signal
+    )
+      .then((response) => {
+        const standings = Array.isArray(response) ? response : [];
 
-      // FILTER STANDINGS
-      // Get both participants in the fixture.
-      const homeParticipant: Participant | undefined = getParticipant(
-        fixture.participants,
-        "home"
-      );
-      const awayParticipant: Participant | undefined = getParticipant(
-        fixture.participants,
-        "away"
-      );
-
-      /* 
-        Filter out the the response to only include entries from the participating
-        teams in the current fixture.
-      */
-      const participantEntries: Standing[] = response.filter(
-        (item: Standing) =>
-          item.participant.id === homeParticipant?.id ||
-          item.participant.id === awayParticipant?.id
-      );
-
-      // SORT STANDINGS
-      const leagues: FixtureTable[] = [];
-
-      // Loop through each of the 'participant' entries to build league tables.
-      participantEntries.forEach((participantEntry: Standing) => {
-        // Build league table
-        const newLeague: FixtureTable | null = buildLeague(
-          response,
-          leagues,
-          participantEntry
+        // Only the two teams in this fixture decide which tables to show.
+        const participantEntries: Standing[] = standings.filter(
+          (item: Standing) =>
+            item.participant.id === homeTeamId ||
+            item.participant.id === awayTeamId
         );
 
-        // If a 'newLeague' was returned, push it into the 'leagues' array.
-        if (newLeague) leagues.push(newLeague);
+        const leagues: FixtureTable[] = [];
+
+        participantEntries.forEach((participantEntry: Standing) => {
+          const newLeague = buildLeague(
+            standings,
+            leagues,
+            participantEntry,
+            competitionName
+          );
+
+          if (newLeague) leagues.push(newLeague);
+        });
+
+        setFixtureTableData(leagues);
+        setError(null);
+      })
+      .catch((cause) => {
+        if (isAbortError(cause)) return;
+
+        setError(getErrorMessage(cause));
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setIsLoading(false);
       });
 
-      setIsLoading(false);
-
-      return leagues;
-    };
-
-    // GET LEAGUE STANDINGS
-    getLeagueData().then((response) => {
-      // SET LEAGUE STANDINGS
-      setFixtureTableData(response);
-    });
-  }, []);
-
-  const buildLeague = (
-    response: Standing[],
-    league: FixtureTable[],
-    participant: Standing
-  ): FixtureTable | null => {
-    const groupName: string = participant.group
-      ? " - " + participant.group.name
-      : "";
-    const leagueName: string = fixture.league.name + groupName;
-
-    let leagueEntries: Standing[] = response.filter(
-      (leagueEntry: Standing) => leagueEntry.stage_id === participant.stage_id
-    );
-
-    if (participant.group_id !== null) {
-      leagueEntries = leagueEntries.filter(
-        (leagueEntry: Standing) => leagueEntry.group_id === participant.group_id
-      );
-    }
-
-    const leagueItem = league.find(
-      (item: FixtureTable) => item.id === participant.stage_id
-    );
-
-    if (leagueItem) return null;
-
-    return {
-      name: leagueName,
-      id: participant.stage_id,
-      standings: leagueEntries,
-    };
-  };
+    return () => controller.abort();
+  }, [seasonId, homeTeamId, awayTeamId, competitionName]);
 
   const getPositionColourIndicator = (rule: Rule | null): string => {
     switch (rule?.type_id) {
@@ -191,7 +186,12 @@ function FixtureTable({ fixture }: FixtureTableProps) {
 
   return (
     <>
-      {!isLoading ? (
+      {error ? (
+        <div className="text-center py-8">
+          <p className="mb-1">Couldn&apos;t load the league table.</p>
+          <p className="text-sm text-[rgba(255,255,255,0.6)]">{error}</p>
+        </div>
+      ) : !isLoading ? (
         <div className="flex flex-col items-center">
           {fixtureTableData.map((league) => (
             <div
