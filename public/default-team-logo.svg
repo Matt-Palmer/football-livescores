@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Team crest placeholder">
+  <circle cx="32" cy="32" r="30" fill="#3f576c"/>
+  <circle cx="32" cy="32" r="30" fill="none" stroke="#7b8fa3" stroke-width="2"/>
+  <path fill="#7b8fa3" d="M32 14.5l7.9 5.8-3 9.3h-9.8l-3-9.3zM17.4 25.6l3 9.3-7.9 5.8-3-9.3zm29.2 0l7.9 5.8-3 9.3-7.9-5.8zM23.9 44.2h16.2l3 9.3-5.6 4.1h-11l-5.6-4.1z"/>
+</svg>

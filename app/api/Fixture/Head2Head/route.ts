@@ -1,29 +1,28 @@
 import { NextResponse } from "next/server";
-
-var _ = require("lodash");
+import { fetchOne, toErrorResponse } from "@/services/Sportmonks";
+import { Fixture } from "@/typings";
 
 export async function POST(request: Request) {
-  const req = await request.json();
-
-  const url = `https://api.sportmonks.com/v3/football/fixtures/head-to-head/${req.home_team_id}/${req.away_team_id}?api_token=${process.env.SPORTMONKS_API_KEY}&include=participants;scores;league;group;periods;`;
-
-  const options = {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      "Accept": "application/json",
-    },
-  };
-
   try {
-    const result = await fetch(url, options);
+    const { home_team_id, away_team_id, timeZone } = await request.json();
 
-    const { data } = await result.json();
+    if (!home_team_id || !away_team_id) {
+      return NextResponse.json(
+        { error: "home_team_id and away_team_id are required." },
+        { status: 400 }
+      );
+    }
 
-    if (data) return NextResponse.json(data);
+    const fixtures = await fetchOne<Fixture[]>(
+      `fixtures/head-to-head/${home_team_id}/${away_team_id}`,
+      {
+        include: "participants;scores;league;group;periods",
+        timezone: timeZone,
+      }
+    );
 
-    return NextResponse.json([]);
+    return NextResponse.json(fixtures ?? []);
   } catch (error) {
-    console.error(error);
+    return toErrorResponse(error);
   }
 }

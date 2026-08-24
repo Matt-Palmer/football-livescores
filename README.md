@@ -1,34 +1,87 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Football Livescores
 
-## Getting Started
+A live football scores app built with Next.js (App Router) and the
+[Sportmonks Football API v3](https://docs.sportmonks.com/football).
 
-First, run the development server:
+- **Home** — today's fixtures, grouped by country and competition, with scores
+  updating every five seconds while matches are in play.
+- **Fixture** (`/Fixture/[id]`) — a single match, with tabs for statistics,
+  events, lineups, the league table and head-to-head history.
+
+Dates and kickoff times are resolved in **the viewer's own timezone**, so
+"today" means today where you are.
+
+## Getting started
+
+### 1. Install dependencies
+
+```bash
+npm install
+```
+
+### 2. Add your Sportmonks API token
+
+The app will not display anything without one. Create `.env.local` in the
+project root:
+
+```
+SPORTMONKS_API_KEY=your_token_here
+```
+
+Get a token from [my.sportmonks.com](https://my.sportmonks.com/) under
+**API Tokens**. `.env.local` is gitignored — never commit it.
+
+If the variable is missing, every API route returns an explicit
+`SPORTMONKS_API_KEY is not set` error rather than failing silently.
+
+### 3. Run the dev server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+> **Note on API plans.** Sportmonks' free tier covers only a small number of
+> competitions, so the homepage will legitimately show just one or two
+> countries. A sparse list is usually your plan's coverage, not a bug.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+## How it works
 
-## Learn More
+The Sportmonks token is **server-side only**. The browser never talks to
+Sportmonks directly; it calls this app's own routes under `app/api/`, which
+attach the token and proxy the request.
 
-To learn more about Next.js, take a look at the following resources:
+```
+components/         React components, grouped by the screen they belong to
+  Fixtures/         Homepage: country -> league -> fixture list
+  Fixture/          Match detail page and its tabs
+  Shared/           Components used by both
+hooks/              Context accessors (useFixturesContext, useFixtureContext)
+services/
+  Api/              Browser-side client for this app's own /api routes
+  Sportmonks/       Server-side Sportmonks client (server-only)
+  Date/             Timezone-aware date handling
+  MatchStates/      Interpreting Sportmonks state ids
+app/api/            Route handlers proxying Sportmonks
+utils/Sportmonks/   Static reference data (countries, states, types)
+design/             Design source files (not served or deployed)
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Live updates
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+Both context providers poll every five seconds while a match is in play, on a
+single long-lived interval that reads current state through refs. In-flight
+requests are cancelled on unmount via `AbortController`.
 
-## Deploy on Vercel
+Polling starts automatically when a fixture passes its kickoff time, and stops
+once the match is complete.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Scripts
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Start the development server |
+| `npm run build` | Production build |
+| `npm start` | Serve a production build |
+| `npm run lint` | Lint the project |

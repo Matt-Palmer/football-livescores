@@ -11,7 +11,7 @@ import { useFixturesContext } from "@/hooks/useFixturesContext";
 import Image from "next/image";
 
 const CountryListItem = () => {
-  const { fixtures, isLoading } = useFixturesContext();
+  const { fixtures, isLoading, error, retry } = useFixturesContext();
 
   const displayCountries = () => {
     if (!fixtures) return;
@@ -44,9 +44,20 @@ const CountryListItem = () => {
 
     return (
       <>
-        {!isLoading ? (
+        {error ? (
+          <div className="text-center py-12">
+            <p className="mb-2">Couldn&apos;t load today&apos;s fixtures.</p>
+            <p className="text-sm text-[rgba(255,255,255,0.6)] mb-6">{error}</p>
+            <button
+              onClick={retry}
+              className="bg-[#EFEF3E] text-black px-6 py-2 rounded-full"
+            >
+              Try again
+            </button>
+          </div>
+        ) : !isLoading ? (
           <>
-            {fixtures ? (
+            {Object.keys(sortedFixtures).length > 0 ? (
               Object.keys(sortedFixtures).map((countryKey: string) => (
                 <Disclosure key={countryKey}>
                   <div className="mb-1 bg-[#3F576C] overflow-hidden">
@@ -58,7 +69,7 @@ const CountryListItem = () => {
                           src={
                             sortedFixtures[countryKey].image_path
                               ? sortedFixtures[countryKey].image_path
-                              : "default-team-logo.svg"
+                              : "/default-team-logo.svg"
                           }
                           fill={true}
                           alt="Country flag"
@@ -78,7 +89,9 @@ const CountryListItem = () => {
                 </Disclosure>
               ))
             ) : (
-              <div>Can not retrieve fixtures</div>
+              <div className="text-center py-12 text-[rgba(255,255,255,0.6)]">
+                No fixtures today.
+              </div>
             )}
           </>
         ) : (

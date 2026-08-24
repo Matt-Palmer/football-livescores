@@ -1,26 +1,23 @@
 import { NextResponse } from "next/server";
+import { fetchOne, toErrorResponse } from "@/services/Sportmonks";
+import { Fixture } from "@/typings";
 
 export async function POST(request: Request) {
-  const req = await request.json();
-
-  const url: string = `https://api.sportmonks.com/v3/football/fixtures/${req.id}?api_token=${process.env.SPORTMONKS_API_KEY}&include=scores;round;stage;group;league;venue;state;lineups;events;timeline;statistics;periods;participants;formations;metadata;`;
-
-  const options: RequestInit = {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      "Accept": "application/json",
-    },
-    cache: "no-store",
-  };
-
   try {
-    const result: Response = await fetch(url, options);
+    const { id, timeZone } = await request.json();
 
-    const { data } = await result.json();
+    if (!id) {
+      return NextResponse.json({ error: "id is required." }, { status: 400 });
+    }
 
-    return NextResponse.json(data);
+    const fixture = await fetchOne<Fixture>(`fixtures/${id}`, {
+      include:
+        "scores;round;stage;group;league;venue;state;lineups;events;timeline;statistics;periods;participants;formations;metadata",
+      timezone: timeZone,
+    });
+
+    return NextResponse.json(fixture);
   } catch (error) {
-    return NextResponse.error();
+    return toErrorResponse(error);
   }
 }
