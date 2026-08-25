@@ -9,6 +9,7 @@ import {
   getSubOn,
 } from "@/services/Events";
 import { Player } from "@/typings";
+import { getContrastTextColour } from "@/utils/helperFunctions";
 import PlayerEventGoal from "../../PlayerEventGoal";
 import PlayerEventAssist from "../../PlayerEventAssist";
 import PlayerEventSubOn from "../../PlayerEventSubOn";
@@ -37,6 +38,7 @@ function SubstituteIndicator({ substitute, colour }: Props) {
       <span
         style={{
           backgroundColor: `${colour}`,
+          color: getContrastTextColour(colour),
         }}
         className="w-8 h-8 relative rounded-full flex justify-center items-center"
       >

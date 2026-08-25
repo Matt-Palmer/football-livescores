@@ -1,7 +1,7 @@
 import FixturesLeagueFixture from "@/components/Shared/FixturesLeagueFixture";
+import LogoBadge from "@/components/Shared/LogoBadge";
 import { useFavouritesContext } from "@/hooks/useFavouritesContext";
 import { Fixture } from "@/typings";
-import Image from "next/image";
 
 type Props = {
   countryId: any;
@@ -41,19 +41,12 @@ const FixturesLeagueList = ({ countryId, fixtures }: Props) => {
           Object.keys(todaysFixturesNew).map((leagueKey) => (
             <div key={leagueKey}>
               <div className="p-2 pb-4 md:p-4 md:pt-2 flex items-center w-full gap-4 h-14">
-                <div className={`relative h-[25px] w-[25px]`}>
-                  <Image
-                    src={
-                      todaysFixturesNew[leagueKey].image_path
-                        ? todaysFixturesNew[leagueKey].image_path
-                        : "/default-team-logo.svg"
-                    }
-                    fill={true}
-                    alt="Country flag"
-                    style={{ objectFit: "cover" }}
-                    sizes={`(max-width: 1200px) 30px, 30px`}
-                  />
-                </div>
+                <LogoBadge
+                  src={todaysFixturesNew[leagueKey].image_path}
+                  alt="Competition logo"
+                  className="h-[25px] w-[25px]"
+                  sizes="(max-width: 1200px) 30px, 30px"
+                />
                 <h2 className="md:text-lg">
                   {todaysFixturesNew[leagueKey].name}
                 </h2>

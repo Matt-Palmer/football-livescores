@@ -18,7 +18,8 @@ function EventsListItem({ event, isHomeTeam }: Props) {
           <FixtureEventVAR
             isHomeTeam={isHomeTeam}
             player_name={event.player_name}
-            result={event.addition}
+            sub_type_id={event.sub_type_id}
+            addition={event.addition}
             minute={event.minute}
             extra_minute={event.extra_minute}
           />

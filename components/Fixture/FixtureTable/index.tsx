@@ -13,6 +13,8 @@ import {
   Standing,
 } from "@/typings";
 import { getParticipant } from "@/services/Participants";
+import { sportmonksTypes } from "@/utils/Sportmonks/Types";
+import LogoBadge from "@/components/Shared/LogoBadge";
 
 type FixtureTableProps = {
   fixture: Fixture;
@@ -158,6 +160,38 @@ function FixtureTable({ fixture }: FixtureTableProps) {
     }
   };
 
+  /*
+    Only the colours actually used in this table, each labelled with the
+    Sportmonks rule name(s) that map to it — so a table for a league with no
+    European qualification shows no Champions League swatch.
+  */
+  const getLegendEntries = (
+    standings: Standing[]
+  ): { colourClass: string; label: string }[] => {
+    const namesByColour = new Map<string, Set<string>>();
+
+    standings.forEach((team) => {
+      const colourClass = getPositionColourIndicator(team.rule);
+
+      if (colourClass === "border-transparent") return;
+
+      const name = sportmonksTypes.find(
+        (type) => type.id === team.rule?.type_id
+      )?.name;
+
+      if (!name) return;
+
+      if (!namesByColour.has(colourClass)) namesByColour.set(colourClass, new Set());
+
+      namesByColour.get(colourClass)!.add(name);
+    });
+
+    return Array.from(namesByColour.entries()).map(([colourClass, names]) => ({
+      colourClass,
+      label: Array.from(names).join(" / "),
+    }));
+  };
+
   const isActiveTeam = (teamId: number): string => {
     const homeTeam: Participant | undefined = fixture.participants.find(
       (team) => team.meta.location === "home"
@@ -193,22 +227,22 @@ function FixtureTable({ fixture }: FixtureTableProps) {
         </div>
       ) : !isLoading ? (
         <div className="flex flex-col items-center">
-          {fixtureTableData.map((league) => (
+          {fixtureTableData.map((league) => {
+            const legendEntries = getLegendEntries(league.standings ?? []);
+
+            return (
             <div
               key={league.id}
               className="overflow-hidden w-full max-w-[700px] table-auto mb-8"
             >
-              <div className="flex mb-4">
-                <div className="relative h-[24px] w-[24px] mr-4">
-                  <Image
-                    src={fixture.league.image_path}
-                    fill={true}
-                    style={{ objectFit: "contain" }}
-                    sizes="(max-width: 1200px) 24px, 24px"
-                    alt="Team Logo"
-                    priority={true}
-                  />
-                </div>
+              <div className="flex items-center mb-4">
+                <LogoBadge
+                  src={fixture.league.image_path}
+                  alt="Competition logo"
+                  className="h-[24px] w-[24px] mr-4"
+                  sizes="(max-width: 1200px) 24px, 24px"
+                  priority={true}
+                />
                 <p>{league.name}</p>
               </div>
 
@@ -289,8 +323,25 @@ function FixtureTable({ fixture }: FixtureTableProps) {
                     </span>
                   </div>
                 ))}
+
+              {legendEntries.length > 0 ? (
+                <div className="flex flex-wrap gap-x-4 gap-y-2 mt-4">
+                  {legendEntries.map((entry) => (
+                    <div
+                      key={entry.colourClass}
+                      className="flex items-center gap-2 text-xs text-[rgba(255,255,255,0.6)]"
+                    >
+                      <span
+                        className={`inline-block w-3 h-3 rounded-sm ${entry.colourClass}`}
+                      ></span>
+                      <span>{entry.label}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
             </div>
-          ))}
+            );
+          })}
         </div>
       ) : (
         <div className="max-w-[700px] m-auto">

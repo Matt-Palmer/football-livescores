@@ -7,6 +7,7 @@ import {
   getSubOff,
 } from "@/services/Events";
 import { Player } from "@/typings";
+import { getContrastTextColour } from "@/utils/helperFunctions";
 import PlayerEventGoal from "../../PlayerEventGoal";
 import PlayerEventAssist from "../../PlayerEventAssist";
 import PlayerEventSubOff from "../../PlayerEventSubOff";
@@ -32,7 +33,7 @@ function PlayerIndicator({ player, colour }: Props) {
       <span
         style={{
           backgroundColor: `${colour}`,
-          color: `#FFFFFF`,
+          color: getContrastTextColour(colour),
           border: `2px solid ${colour}`,
         }}
         className={`relative rounded-full w-8 h-8 md:w-10 md:h-10 flex justify-center items-center mb-2`}

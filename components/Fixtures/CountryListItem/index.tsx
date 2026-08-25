@@ -7,9 +7,9 @@ import { sportmonksCountries } from "@/utils/Sportmonks/Countries";
 import { leagueOrder } from "@/utils/LeagueOrder";
 
 import FixturesLeagueList from "../../Shared/FixturesLeagueList";
+import LogoBadge from "@/components/Shared/LogoBadge";
 import { useFixturesContext } from "@/hooks/useFixturesContext";
 import { getDayStripLabel } from "@/services/Date";
-import Image from "next/image";
 
 const CountryListItem = () => {
   const { fixtures, selectedDate, isToday, isLoading, error, retry } =
@@ -66,21 +66,12 @@ const CountryListItem = () => {
                 <Disclosure key={countryKey}>
                   <div className="mb-1 bg-[#3F576C] overflow-hidden">
                     <DisclosureButton className="p-2 md:p-4 flex items-center w-full gap-4 rounded-lg bg-[#3F576C]">
-                      <div
-                        className={`relative h-[25px] w-[25px] md:h-[30px] md:w-[30px] rounded-2xl overflow-hidden`}
-                      >
-                        <Image
-                          src={
-                            sortedFixtures[countryKey].image_path
-                              ? sortedFixtures[countryKey].image_path
-                              : "/default-team-logo.svg"
-                          }
-                          fill={true}
-                          alt="Country flag"
-                          style={{ objectFit: "cover" }}
-                          sizes={`(max-width: 1200px) 30px, 30px`}
-                        />
-                      </div>
+                      <LogoBadge
+                        src={sortedFixtures[countryKey].image_path}
+                        alt="Country flag"
+                        className="h-[25px] w-[25px] md:h-[30px] md:w-[30px]"
+                        sizes="(max-width: 1200px) 30px, 30px"
+                      />
                       <h2 className="md:text-lg">{countryKey}</h2>
                     </DisclosureButton>
                     <DisclosurePanel>

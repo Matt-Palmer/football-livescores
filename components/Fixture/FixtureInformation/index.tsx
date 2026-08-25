@@ -1,7 +1,9 @@
 import Image from "next/image";
+import Link from "next/link";
 
 import { Fixture, Participant } from "@/typings";
 import { sportmonksCountries } from "@/utils/Sportmonks/Countries";
+import Breadcrumb from "@/components/Shared/Breadcrumb";
 import ScoreDisplay from "./ScoreDisplay";
 
 type FixtureInformationProps = {
@@ -9,84 +11,73 @@ type FixtureInformationProps = {
 }
 
 function FixtureInformation({fixture}: FixtureInformationProps) {
-  const getCompetitionSrting = () => {
+  const getCountryName = (): string => {
     const countryObj = sportmonksCountries.find(
       (country) => country.id === fixture.league.country_id
     );
 
-    const countryName = countryObj ? countryObj.name : "";
-    const groupName = fixture.group ? " / " + fixture.group.name : "";
-    const roundName = fixture.round ? " / Round " + fixture.round.name : "";
-    const leagueName = fixture.league.name + groupName + roundName;
-
-    return <span>{`${countryName} / ${leagueName}`}</span>;
+    return countryObj ? countryObj.name : "";
   };
 
-  const getTeamLogo = (location: string): string => {
-    const team = fixture.participants.find(
+  const getLeagueLabel = (): string => {
+    const groupName = fixture.group ? " / " + fixture.group.name : "";
+    const roundName = fixture.round ? " / Round " + fixture.round.name : "";
+
+    return fixture.league.name + groupName + roundName;
+  };
+
+  const getTeam = (location: string): Participant | undefined => {
+    return fixture.participants.find(
       (participant: Participant) => participant.meta.location === location
     );
+  };
 
-    if (team) return team.image_path;
+  const renderTeam = (location: string) => {
+    const team = getTeam(location);
 
-    return "/default-team-logo.svg";
+    return (
+      <Link
+        href={`/Team/${team?.id}`}
+        className="flex flex-col items-center gap-2 flex-1"
+      >
+        <div
+          className={`relative h-[60px] w-[60px] md:h-[90px] md:w-[90px] lg:h-[120px] lg:w-[120px]`}
+        >
+          <Image
+            src={team?.image_path || "/default-team-logo.svg"}
+            fill={true}
+            alt={`${location === "home" ? "Home" : "Away"} team logo`}
+            style={{ objectFit: "cover" }}
+            sizes={`(max-width: 1200px) 120px, 120px`}
+          />
+        </div>
+        <span className="text-sm md:text-base text-center hover:text-[#EFEF3E]">
+          {team?.name}
+        </span>
+      </Link>
+    );
   };
 
   return (
     <div key={fixture.id}>
       <div className="mb-4">
-        <div className="flex mb-1">
-          <div className={`relative h-[20px] w-[20px] md:h-[25px] md:w-[25px]`}>
-            <Image
-              src={
-                fixture.league.image_path
-                  ? fixture.league.image_path
-                  : "/default-team-logo.svg"
-              }
-              fill={true}
-              alt="Competition logo"
-              style={{ objectFit: "cover" }}
-              sizes={`(max-width: 1200px) 30px, 30px`}
-            />
-          </div>
-          <div className="text-gray-400 text-sm md:text-base ml-2">
-            {getCompetitionSrting()}
-          </div>
-        </div>
-        <div>
-          <span className="text-sm md:text-base">{fixture.name}</span>
-        </div>
+        <Breadcrumb
+          countryId={fixture.league.country_id}
+          countryName={getCountryName()}
+          league={{
+            id: fixture.league.id,
+            roundId: fixture.round?.id,
+            label: getLeagueLabel(),
+            imagePath: fixture.league.image_path,
+          }}
+        />
       </div>
-      <div className="flex justify-center items-center">
-        <div className="flex justify-center">
-          <div
-            className={`relative h-[60px] w-[60px] md:h-[90px] md:w-[90px] lg:h-[120px] lg:w-[120px]`}
-          >
-            <Image
-              src={getTeamLogo("home")}
-              fill={true}
-              alt="Home team logo"
-              style={{ objectFit: "cover" }}
-              sizes={`(max-width: 1200px) 120px, 120px`}
-            />
-          </div>
-        </div>
+      <div className="flex justify-center items-start">
+        {renderTeam("home")}
 
         <ScoreDisplay fixture={fixture} />
 
-        <div className="flex justify-center">
-          <div
-            className={`relative h-[60px] w-[60px] md:h-[90px] md:w-[90px] lg:h-[120px] lg:w-[120px]`}
-          >
-            <Image
-              src={getTeamLogo("away")}
-              fill={true}
-              alt="Away team logo"
-              style={{ objectFit: "cover" }}
-              sizes={`(max-width: 1200px) 120px, 120px`}
-            />
-          </div>
-        </div>
+        {renderTeam("away")}
       </div>
     </div>
   );
