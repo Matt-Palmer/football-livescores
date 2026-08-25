@@ -1,9 +1,16 @@
 
 import {
+  getStateName,
   isComplete,
   isInplay,
+  neverKickedOff,
 } from "@/services/MatchStates";
 import { isTabDisplayed } from "@/utils/individualFixtureHelpers";
+import {
+  formatFixtureDate,
+  formatKickOffTime,
+  isFixtureDateInFuture,
+} from "@/services/Date";
 import { Fixture } from "@/typings";
 import { MdStadium } from "react-icons/md";
 
@@ -13,15 +20,6 @@ type ScoreDisplayProps = {
 };
 
 function ScoreDisplay({fixture}: ScoreDisplayProps ) {
-  const getFixtureTime = (timestamp: number) => {
-    const date = new Date(timestamp * 1000);
-    const fixtureStartTime = `${date.getHours()}:${
-      date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes()
-    }`;
-
-    return fixtureStartTime;
-  };
-
   const getCurrentScore = () => {
     const currentScores = fixture.scores.filter(
       (score) => score.description === "CURRENT"
@@ -78,7 +76,11 @@ function ScoreDisplay({fixture}: ScoreDisplayProps ) {
 
   return (
     <div className="flex flex-col items-center">
-      {isTabDisplayed(fixture) ? (
+      {neverKickedOff(fixture) ? (
+        <span className="md:text-2xl lg:text-3xl mb-2 px-6 py-3">
+          {getStateName(fixture)}
+        </span>
+      ) : isTabDisplayed(fixture) ? (
         <>
           <div
             className={`flex justify-center mb-2 ${
@@ -89,9 +91,16 @@ function ScoreDisplay({fixture}: ScoreDisplayProps ) {
           </div>
         </>
       ) : (
-        <span className="md:text-2xl lg:text-3xl mb-2 px-6 py-3">
-          {getFixtureTime(fixture.starting_at_timestamp)}
-        </span>
+        <div className="flex flex-col items-center mb-2 px-6 py-3">
+          {isFixtureDateInFuture(fixture.starting_at_timestamp) ? (
+            <span className="text-sm md:text-base opacity-70">
+              {formatFixtureDate(fixture.starting_at_timestamp, true)}
+            </span>
+          ) : null}
+          <span className="md:text-2xl lg:text-3xl">
+            {formatKickOffTime(fixture.starting_at_timestamp)}
+          </span>
+        </div>
       )}
 
       {/* <span className="flex items-center">

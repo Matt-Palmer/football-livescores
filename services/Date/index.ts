@@ -76,3 +76,55 @@ export const formatFixtureDateOrTime = (
 
   return formatFixtureDate(timestamp, withYear);
 };
+
+/**
+ * True when a fixture's kickoff falls on a later calendar day than today, in
+ * the viewer's timezone. String comparison works because both sides are
+ * YYYY-MM-DD.
+ */
+export const isFixtureDateInFuture = (timestamp: number): boolean => {
+  return getTodaysDate(new Date(timestamp * 1000)) > getTodaysDate();
+};
+
+/**
+ * A YYYY-MM-DD date string as a local-midnight `Date`.
+ *
+ * `new Date("YYYY-MM-DD")` parses as UTC midnight, which is the wrong
+ * instant everywhere west of Greenwich. Calendar-only values (no time
+ * component) have no timezone of their own, so this treats them as
+ * local-midnight instead — matching how `react-day-picker` represents days
+ * internally, and safe to round-trip through `getTodaysDate` below.
+ */
+export const parseCalendarDate = (date: string): Date => {
+  const [year, month, day] = date.split("-").map(Number);
+
+  return new Date(year, month - 1, day);
+};
+
+/** Shifts a YYYY-MM-DD date string by `days` (negative to go backwards). */
+export const addDays = (date: string, days: number): string => {
+  const shifted = parseCalendarDate(date);
+
+  shifted.setDate(shifted.getDate() + days);
+
+  return getTodaysDate(shifted);
+};
+
+/**
+ * "Yesterday" / "Today" / "Tomorrow" for the three nearest days, otherwise a
+ * formatted date like "Sat 29 Aug".
+ */
+export const getDayStripLabel = (date: string): string => {
+  const today = getTodaysDate();
+
+  if (date === today) return "Today";
+  if (date === addDays(today, -1)) return "Yesterday";
+  if (date === addDays(today, 1)) return "Tomorrow";
+
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: getTimeZone(),
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+  }).format(parseCalendarDate(date));
+};

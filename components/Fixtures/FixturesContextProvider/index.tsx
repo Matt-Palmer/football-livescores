@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useEffect, useRef, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { getErrorMessage, isAbortError } from "@/services/Api";
 import { getTodaysDate } from "@/services/Date";
@@ -14,11 +15,14 @@ import { Fixture } from "@/typings";
 
 const POLL_INTERVAL_MS = 5000;
 const CLOCK_INTERVAL_MS = 1000;
+const DATE_PARAM = "date";
 
 type FixturesContextType = {
   fixtures: Fixture[];
   fixturesInPlay: boolean;
-  todaysDate: string;
+  selectedDate: string;
+  isToday: boolean;
+  goToDate: (date: string) => void;
   isLoading: boolean;
   error: string | null;
   retry: () => void;
@@ -33,12 +37,38 @@ export const FixturesContext = createContext<FixturesContextType | null>(null);
 export default function FixturesContextProvider({
   children,
 }: FixturesContextProviderType) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  /*
+    `clockDate` always tracks the real current date in the viewer's
+    timezone — it is what "today" resolves to, independent of whatever date
+    the viewer has navigated to. `selectedDate` falls back to it whenever the
+    URL has no explicit ?date, which is what makes the homepage default to
+    today without ever resolving "today" on the server (the server does not
+    know the viewer's timezone).
+  */
+  const [clockDate, setClockDate] = useState<string>(() => getTodaysDate());
+  const dateParam = searchParams.get(DATE_PARAM);
+  const selectedDate = dateParam ?? clockDate;
+  const isToday = selectedDate === clockDate;
+
   const [fixtures, setFixtures] = useState<Fixture[]>([]);
   const [fixturesInPlay, setFixturesInPlay] = useState<boolean>(false);
-  const [todaysDate, setTodaysDate] = useState<string>(() => getTodaysDate());
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState<number>(0);
+
+  /*
+    `isLoading` is derived rather than set at the top of the fetch effect
+    below. Calling setState synchronously in an effect body forces an extra
+    render pass and trips `set-state-in-effect`; comparing keys instead means
+    a date change flips `isLoading` true on the very same render that changed
+    it, and the effect only ever calls setState from its async continuation.
+  */
+  const [settledFetchKey, setSettledFetchKey] = useState<string | null>(null);
+  const fetchKey = `${selectedDate}:${reloadKey}`;
+  const isLoading = settledFetchKey !== fetchKey;
 
   /*
     Polling reads the current fixture list through a ref rather than through
@@ -59,6 +89,15 @@ export default function FixturesContextProvider({
   const fixturesInPlayRef = useRef<boolean>(fixturesInPlay);
 
   /*
+    And for whether the viewer is currently looking at today. Polling and
+    kickoff-detection only make sense for today's fixtures — a fixture list
+    for a past or future date will never go live — so the clock and poll
+    intervals below both gate on this ref rather than closing over a stale
+    boolean from whenever the interval was created.
+  */
+  const isTodayRef = useRef<boolean>(isToday);
+
+  /*
     Refs are synced in effects rather than assigned during render. Under React
     19 a render can be discarded before it commits, and a ref written during
     that render would keep a value from work that never happened.
@@ -74,17 +113,42 @@ export default function FixturesContextProvider({
     fixturesInPlayRef.current = fixturesInPlay;
   }, [fixturesInPlay]);
 
+  useEffect(() => {
+    isTodayRef.current = isToday;
+  }, [isToday]);
+
   const retry = useCallback(() => {
     setError(null);
-    setIsLoading(true);
     setReloadKey((key) => key + 1);
   }, []);
 
-  // Initial load, and any explicit retry.
+  const goToDate = useCallback(
+    (date: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+
+      // Keeps the URL clean (no ?date at all) whenever it lands back on
+      // today, rather than pinning to today's literal date string.
+      if (date === clockDate) {
+        params.delete(DATE_PARAM);
+      } else {
+        params.set(DATE_PARAM, date);
+      }
+
+      const query = params.toString();
+
+      router.push(query ? `${pathname}?${query}` : pathname, {
+        scroll: false,
+      });
+    },
+    [searchParams, router, pathname, clockDate]
+  );
+
+  // Load fixtures whenever the selected date changes, and on any explicit
+  // retry.
   useEffect(() => {
     const controller = new AbortController();
 
-    getFixtures(controller.signal)
+    getFixtures(selectedDate, controller.signal)
       .then((response) => {
         setFixtures(response);
         setFixturesInPlay(areFixturesInPlay(response));
@@ -96,23 +160,23 @@ export default function FixturesContextProvider({
         setError(getErrorMessage(cause));
       })
       .finally(() => {
-        // Only clears once the request has actually settled. Previously this
-        // ran synchronously at the end of the effect, so the skeleton vanished
-        // before any data existed.
-        if (!controller.signal.aborted) setIsLoading(false);
+        // Only marks this fetch settled once it has actually finished, so
+        // `isLoading` stays true for the whole request rather than clearing
+        // before any data exists.
+        if (!controller.signal.aborted) setSettledFetchKey(fetchKey);
       });
 
     return () => controller.abort();
-  }, [todaysDate, reloadKey]);
+  }, [selectedDate, reloadKey, fetchKey]);
 
   // Live polling. One interval for the lifetime of the provider.
   useEffect(() => {
     const controller = new AbortController();
 
     const poll = () => {
-      if (!fixturesInPlayRef.current) return;
+      if (!isTodayRef.current || !fixturesInPlayRef.current) return;
 
-      getFixtures(controller.signal)
+      getFixtures(selectedDate, controller.signal)
         .then((response) => {
           if (response.length === 0) return;
 
@@ -134,19 +198,20 @@ export default function FixturesContextProvider({
       clearInterval(pollTimer);
       controller.abort();
     };
-  }, []);
+  }, [selectedDate]);
 
   /*
     Clock. Two jobs: notice the local day rolling over, and notice the first
     kickoff of the day so polling starts without waiting for a page refresh.
+    Both are only meaningful while the viewer is looking at today.
   */
   useEffect(() => {
     const clockTimer = setInterval(() => {
       const date = getTodaysDate();
 
-      setTodaysDate((current) => (current === date ? current : date));
+      setClockDate((current) => (current === date ? current : date));
 
-      if (fixturesInPlayRef.current) return;
+      if (!isTodayRef.current || fixturesInPlayRef.current) return;
 
       const nowInSeconds = Date.now() / 1000;
 
@@ -172,7 +237,16 @@ export default function FixturesContextProvider({
 
   return (
     <FixturesContext.Provider
-      value={{ fixtures, fixturesInPlay, todaysDate, isLoading, error, retry }}
+      value={{
+        fixtures,
+        fixturesInPlay,
+        selectedDate,
+        isToday,
+        goToDate,
+        isLoading,
+        error,
+        retry,
+      }}
     >
       {children}
     </FixturesContext.Provider>

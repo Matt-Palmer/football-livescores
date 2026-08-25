@@ -1,4 +1,5 @@
 import Header from "@/components/Layout/Header";
+import FavouritesContextProvider from "@/components/Shared/FavouritesContextProvider";
 import "./globals.css";
 import type { Metadata } from "next";
 
@@ -15,8 +16,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="bg-[#182e41] text-white overflow-x-hidden">
-        <Header />
-        {children}
+        <FavouritesContextProvider>
+          <Header />
+          {children}
+        </FavouritesContextProvider>
       </body>
     </html>
   );

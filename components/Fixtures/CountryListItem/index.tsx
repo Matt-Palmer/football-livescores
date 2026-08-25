@@ -8,10 +8,12 @@ import { leagueOrder } from "@/utils/LeagueOrder";
 
 import FixturesLeagueList from "../../Shared/FixturesLeagueList";
 import { useFixturesContext } from "@/hooks/useFixturesContext";
+import { getDayStripLabel } from "@/services/Date";
 import Image from "next/image";
 
 const CountryListItem = () => {
-  const { fixtures, isLoading, error, retry } = useFixturesContext();
+  const { fixtures, selectedDate, isToday, isLoading, error, retry } =
+    useFixturesContext();
 
   const displayCountries = () => {
     if (!fixtures) return;
@@ -46,7 +48,9 @@ const CountryListItem = () => {
       <>
         {error ? (
           <div className="text-center py-12">
-            <p className="mb-2">Couldn&apos;t load today&apos;s fixtures.</p>
+            <p className="mb-2">
+              Couldn&apos;t load {isToday ? "today's" : "this day's"} fixtures.
+            </p>
             <p className="text-sm text-[rgba(255,255,255,0.6)] mb-6">{error}</p>
             <button
               onClick={retry}
@@ -90,7 +94,9 @@ const CountryListItem = () => {
               ))
             ) : (
               <div className="text-center py-12 text-[rgba(255,255,255,0.6)]">
-                No fixtures today.
+                {isToday
+                  ? "No fixtures today."
+                  : `No fixtures on ${getDayStripLabel(selectedDate)}.`}
               </div>
             )}
           </>

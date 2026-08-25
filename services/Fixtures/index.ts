@@ -1,15 +1,13 @@
 import { postJson } from "@/services/Api";
-import { getTodaysDate } from "@/services/Date";
 import { isInplay } from "@/services/MatchStates";
 import { Fixture } from "@/typings";
 
-/** Today's fixtures, in the viewer's timezone. Throws ApiError on failure. */
-export const getFixtures = async (signal?: AbortSignal): Promise<Fixture[]> => {
-  const fixtures = await postJson<Fixture[]>(
-    "GetFixtures",
-    { todaysDate: getTodaysDate() },
-    signal
-  );
+/** A given date's fixtures (YYYY-MM-DD). Throws ApiError on failure. */
+export const getFixtures = async (
+  date: string,
+  signal?: AbortSignal
+): Promise<Fixture[]> => {
+  const fixtures = await postJson<Fixture[]>("GetFixtures", { date }, signal);
 
   return Array.isArray(fixtures) ? fixtures : [];
 };

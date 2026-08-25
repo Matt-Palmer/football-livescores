@@ -1,15 +1,16 @@
 import { sportmonksTypes } from "@/utils/Sportmonks/Types";
 import { Statistic } from "@/typings";
 
-const statisticOrder: any = {
-  possesion: [45],
-  shooting: [42, 86, 41, 58, 49, 50],
-  miscellaneous: [34, 51, 56, 84, 83, 60, 53],
-  passing: [80, 81, 82, 117, 98, 99],
-  dribbling: [108, 109],
-  defending: [78, 100, 66, 70, 65, 106, 57],
-  attacks: [43, 1527, 44],
-};
+const statisticCategories: { label: string; stats: number[] }[] = [
+  { label: "Possession", stats: [45] },
+  { label: "Shooting", stats: [42, 86, 41, 58, 49, 50] },
+  { label: "Miscellaneous", stats: [34, 51, 56, 84, 83, 60, 53] },
+  { label: "Passing", stats: [80, 81, 82, 117, 98, 99] },
+  // 1605 (Successful Dribbles %) added alongside the existing dribble counts.
+  { label: "Dribbling", stats: [108, 109, 1605] },
+  { label: "Defending", stats: [78, 100, 66, 70, 65, 106, 57] },
+  { label: "Attacks", stats: [43, 1527, 44] },
+];
 
 type FixtureStatisticsProps = {
   statistics: Statistic[];
@@ -70,15 +71,27 @@ function FixtureStatistics({ statistics }: FixtureStatisticsProps) {
     return (
       <div className="flex flex-col items-center">
         <div className="w-full max-w-[700px]">
-          {Object.keys(statisticOrder).map((key, index) => (
-            <div key={key} className="mb-12">
-              {statisticOrder[key].map((stat: number) => (
-                <div key={stat}>
-                  <div>{getStatistic(stat)}</div>
-                </div>
-              ))}
-            </div>
-          ))}
+          {statisticCategories.map((category) => {
+            const rows = category.stats
+              .map((stat) => ({ stat, row: getStatistic(stat) }))
+              .filter(({ row }) => row);
+
+            // A category whose stats are all 0-0 (or absent) has nothing to
+            // show — skip the header rather than leave it floating over
+            // nothing.
+            if (rows.length === 0) return null;
+
+            return (
+              <div key={category.label} className="mb-12">
+                <h3 className="text-sm md:text-base text-[rgba(255,255,255,0.6)] uppercase tracking-wide mb-2">
+                  {category.label}
+                </h3>
+                {rows.map(({ stat, row }) => (
+                  <div key={stat}>{row}</div>
+                ))}
+              </div>
+            );
+          })}
         </div>
       </div>
     );

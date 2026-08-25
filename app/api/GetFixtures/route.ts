@@ -4,13 +4,13 @@ import { Fixture } from "@/typings";
 
 export async function POST(request: Request) {
   try {
-    const { todaysDate, timeZone } = await request.json();
+    const { date, timeZone } = await request.json();
 
-    if (!todaysDate) {
-      return NextResponse.json({ error: "todaysDate is required." }, { status: 400 });
+    if (!date) {
+      return NextResponse.json({ error: "date is required." }, { status: 400 });
     }
 
-    const fixtures = await fetchAll<Fixture>(`fixtures/date/${todaysDate}`, {
+    const fixtures = await fetchAll<Fixture>(`fixtures/date/${date}`, {
       include: "participants;scores;league;group;periods",
       timezone: timeZone,
     });
