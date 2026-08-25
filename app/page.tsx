@@ -1,10 +1,13 @@
 import FixturesComponent from "@/components/Fixtures";
 import FixturesContextProvider from "@/components/Fixtures/FixturesContextProvider";
+import FavouritesContextProvider from "@/components/Shared/FavouritesContextProvider";
 
 export default function Home() {
   return (
-    <FixturesContextProvider>
-      <FixturesComponent />
-    </FixturesContextProvider>
+    <FavouritesContextProvider>
+      <FixturesContextProvider>
+        <FixturesComponent />
+      </FixturesContextProvider>
+    </FavouritesContextProvider>
   );
 }
