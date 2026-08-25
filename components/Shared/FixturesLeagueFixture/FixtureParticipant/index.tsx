@@ -25,7 +25,7 @@ function FixtureParticipant({ fixture, location }: Props) {
     );
 
     return (
-      <span className={`text-sm md:text-base ${isInplay(fixture) ? "text-[#ED3E42]" : ""}`}>
+      <span className={`text-xs ${isInplay(fixture) ? "text-[#E1523D]" : ""}`}>
         {score?.score.goals}
       </span>
     );
@@ -58,12 +58,12 @@ function FixtureParticipant({ fixture, location }: Props) {
 
   return (
     <div
-      className={`px-2 md:px-4 py-[1px] flex items-center justify-between rounded-lg ${
+      className={`px-2 md:px-4 py-[2px] flex items-center justify-between rounded-lg ${
         isComplete(fixture) && !getWinner() ? "opacity-60" : ""
       }`}
     >
       <div className="flex items-center gap-2">
-        <div className={`relative h-[22px] w-[22px]`}>
+        <div className={`relative h-[18px] w-[18px]`}>
           <Image
             src={
               participant.image_path
@@ -76,7 +76,7 @@ function FixtureParticipant({ fixture, location }: Props) {
             sizes={`(max-width: 1200px) 30px, 30px`}
           />
         </div>
-        <p className="text-sm md:text-base">{participant?.name}</p>
+        <p className="text-xs line-clamp-1">{participant?.name}</p>
       </div>
 
       {scores.length > 0 ? getScore() : null}

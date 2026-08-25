@@ -1,12 +1,13 @@
 "use client";
 
-import { createContext, useCallback, useSyncExternalStore } from "react";
+import { createContext, useCallback, useMemo, useSyncExternalStore } from "react";
 
 const STORAGE_KEY = "favouriteFixtureIds";
 
 const EMPTY_FAVOURITES: ReadonlySet<number> = new Set();
 
 type FavouritesContextType = {
+  favouriteIds: number[];
   isFavourite: (fixtureId: number) => boolean;
   toggleFavourite: (fixtureId: number) => void;
 };
@@ -85,11 +86,15 @@ function getServerSnapshot() {
 export default function FavouritesContextProvider({
   children,
 }: FavouritesContextProviderType) {
-  const favouriteIds = useSyncExternalStore(
+  const favourites = useSyncExternalStore(
     subscribe,
     readFavourites,
     getServerSnapshot
   );
+
+  // readFavourites returns the same Set instance across renders unless the
+  // favourites actually changed, so this array is only rebuilt when they do.
+  const favouriteIds = useMemo(() => Array.from(favourites), [favourites]);
 
   const toggleFavourite = useCallback((fixtureId: number) => {
     const next = new Set(readFavourites());
@@ -104,12 +109,18 @@ export default function FavouritesContextProvider({
   }, []);
 
   const isFavourite = useCallback(
-    (fixtureId: number) => favouriteIds.has(fixtureId),
-    [favouriteIds]
+    (fixtureId: number) => favourites.has(fixtureId),
+    [favourites]
   );
 
   return (
-    <FavouritesContext.Provider value={{ isFavourite, toggleFavourite }}>
+    <FavouritesContext.Provider
+      value={{
+        favouriteIds,
+        isFavourite,
+        toggleFavourite,
+      }}
+    >
       {children}
     </FavouritesContext.Provider>
   );

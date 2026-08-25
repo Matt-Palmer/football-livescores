@@ -42,21 +42,21 @@ function FixtureStatistics({ statistics }: FixtureStatisticsProps) {
       <>
         <div className="flex justify-between text-white py-2">
           <span
-            className={`px-2 md:text-lg lg:text-xl ${
+            className={`px-2 text-sm ${
               newStatisticObj.home > newStatisticObj.away
-                ? "bg-[#EFEF3E] rounded-xl text-black"
+                ? "bg-[#C9A15A] rounded-lg text-black"
                 : "text-white"
             }`}
           >
             <span>{newStatisticObj.home}</span>
           </span>
-          <span className="text-white md:text-lg lg:text-xl">
+          <span className="text-white text-sm">
             {newStatisticObj.name}
           </span>
           <span
-            className={`text-white px-2 text-right md:text-lg lg:text-xl ${
+            className={`text-white px-2 text-right text-sm ${
               newStatisticObj.away > newStatisticObj.home &&
-              "bg-[#3F576C] rounded-xl"
+              "bg-[#152420] rounded-lg"
             } `}
           >
             <span>{newStatisticObj.away} </span>
@@ -83,7 +83,7 @@ function FixtureStatistics({ statistics }: FixtureStatisticsProps) {
 
             return (
               <div key={category.label} className="mb-12">
-                <h3 className="text-sm md:text-base text-[rgba(255,255,255,0.6)] uppercase tracking-wide mb-2">
+                <h3 className="text-sm md:text-base text-brand-muted uppercase tracking-wide mb-2">
                   {category.label}
                 </h3>
                 {rows.map(({ stat, row }) => (

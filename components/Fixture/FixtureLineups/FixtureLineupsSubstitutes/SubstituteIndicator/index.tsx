@@ -33,7 +33,7 @@ function SubstituteIndicator({ substitute, colour }: Props) {
   return (
     <div
       key={substitute.player_id || _.uniqueId()}
-      className={`flex items-center gap-4 bg-[#3F576C] rounded-full p-2 mb-2`}
+      className={`flex items-center gap-4 bg-[#152420] rounded-full p-2 mb-2`}
     >
       <span
         style={{

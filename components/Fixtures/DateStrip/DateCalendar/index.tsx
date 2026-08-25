@@ -29,11 +29,11 @@ const dayPickerClassNames = {
   // text-align/align-middle rather than flex, which would knock them out of
   // table layout and stack every cell in the row vertically instead.
   weekday:
-    "h-8 text-xs font-normal text-[rgba(255,255,255,0.6)] text-center align-middle",
+    "h-8 text-xs font-normal text-brand-muted text-center align-middle",
   day: "w-8 h-8 p-0 text-center align-middle text-sm",
   day_button: "w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center",
-  selected: "[&>button]:bg-[#EFEF3E] [&>button]:text-black [&>button]:hover:bg-[#EFEF3E]",
-  today: "[&>button]:text-[#EFEF3E] [&>button]:font-semibold",
+  selected: "[&>button]:bg-[#C9A15A] [&>button]:text-black [&>button]:hover:bg-[#C9A15A]",
+  today: "[&>button]:text-[#C9A15A] [&>button]:font-semibold",
   outside: "[&>button]:text-[rgba(255,255,255,0.3)]",
 };
 
@@ -49,7 +49,7 @@ function DateCalendar({ selectedDate, onSelect }: Props) {
 
       <PopoverPanel
         anchor="bottom"
-        className="z-10 [--anchor-gap:6px] rounded-lg bg-[#3F576C] p-3 shadow-lg"
+        className="z-10 [--anchor-gap:6px] rounded-lg bg-[#152420] p-3 shadow-lg"
       >
         {({ close }) => (
           <DayPicker

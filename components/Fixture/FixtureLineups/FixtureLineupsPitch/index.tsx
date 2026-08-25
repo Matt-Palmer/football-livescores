@@ -28,7 +28,7 @@ function FixtureLineupsPitch({ isHomeTeamDisplayed }: Props) {
   };
 
   return (
-    <div className="flex flex-col w-full max-w-[500px] h-[550px] md:h-[600px] bg-[#3f576c]">
+    <div className="flex flex-col w-full max-w-[500px] h-[550px] md:h-[600px] bg-[#152420]">
       {isHomeTeamDisplayed ? (
         <ParticipantLineup
           lineup={getStartingEleven("home")}

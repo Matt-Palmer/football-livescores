@@ -37,7 +37,7 @@ function FixtureEventsList({
       {period && period.started ? (
         <div className="flex items-center relative h-10 mb-2">
           <hr className="w-full" />
-          <p className="absolute flex items-center px-2 bg-[#182e41] h-10 right-1/2 translate-x-1/2">
+          <p className="absolute flex items-center px-2 bg-[#0E1A14] h-10 right-1/2 translate-x-1/2">
             {period.sort_order === 1 ? '1st' : '2nd'} Half Begins
           </p>
         </div>

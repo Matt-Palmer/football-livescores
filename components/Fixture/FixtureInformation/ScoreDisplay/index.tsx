@@ -13,6 +13,7 @@ import {
 } from "@/services/Date";
 import { Fixture } from "@/typings";
 import { MdStadium } from "react-icons/md";
+import LiveIndicator from "@/components/Shared/LiveIndicator";
 
 
 type ScoreDisplayProps = {
@@ -64,14 +65,14 @@ function ScoreDisplay({fixture}: ScoreDisplayProps ) {
     return null;
   };
 
-  const getMinutesPassed = () => {
+  const getMinutesPassed = (): number | null => {
     if (fixture.periods.length <= 0) return null;
 
     const currentPeriod = fixture.periods[fixture.periods.length - 1].started
       ? fixture.periods[fixture.periods.length - 1]
       : fixture.periods[0];
 
-    return <span>{currentPeriod.minutes}</span>;
+    return currentPeriod.minutes;
   };
 
   return (
@@ -82,10 +83,11 @@ function ScoreDisplay({fixture}: ScoreDisplayProps ) {
         </span>
       ) : isTabDisplayed(fixture) ? (
         <>
+          {isInplay(fixture) && <LiveIndicator minute={getMinutesPassed()} />}
           <div
             className={`flex justify-center mb-2 ${
-              isInplay(fixture) ? "text-[#ED3E42]" : ""
-            }  text-center text-3xl md:text-4xl lg:text-5xl px-6 py-3`}
+              isInplay(fixture) ? "text-[#E1523D]" : ""
+            }  text-center text-2xl md:text-3xl px-6 py-3`}
           >
             {getCurrentScore()}
           </div>

@@ -32,7 +32,7 @@ function DateStrip() {
           <button
             type="button"
             onClick={() => goToDate(getTodaysDate())}
-            className="text-xs px-2 py-1 rounded-full border border-[#EFEF3E] text-[#EFEF3E]"
+            className="text-xs px-2 py-1 rounded-full border border-[#C9A15A] text-[#C9A15A]"
           >
             Today
           </button>

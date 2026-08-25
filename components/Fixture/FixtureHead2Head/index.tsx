@@ -140,7 +140,7 @@ function FixtureHead2Head({ participants, league }: FixtureHead2HeadProps) {
           {homeTeamWins !== 0 ? (
             <div
               style={{ width: `${homeWinsPercent}%` }}
-              className={`h-1 bg-[#EFEF3E] rounded-full mx-[2px]`}
+              className={`h-1 bg-[#C9A15A] rounded-full mx-[2px]`}
             ></div>
           ) : null}
 
@@ -154,7 +154,7 @@ function FixtureHead2Head({ participants, league }: FixtureHead2HeadProps) {
           {awayTeamWins !== 0 ? (
             <div
               style={{ width: `${awayWinsPercent}%` }}
-              className={`h-1 bg-[#3F576C] rounded-full mx-[2px]`}
+              className={`h-1 bg-[#152420] rounded-full mx-[2px]`}
             ></div>
           ) : null}
         </div>
@@ -169,7 +169,7 @@ function FixtureHead2Head({ participants, league }: FixtureHead2HeadProps) {
           {error ? (
             <div className="text-center py-8">
               <p className="mb-1">Couldn&apos;t load head-to-head data.</p>
-              <p className="text-sm text-[rgba(255,255,255,0.6)]">{error}</p>
+              <p className="text-sm text-brand-muted">{error}</p>
             </div>
           ) : previousFixtures.length > 0 ? (
             <div className="flex flex-col-reverse lg:flex-row w-full max-w-[600px] lg:max-w-[900px] lg:gap-8 m-auto">
@@ -193,43 +193,43 @@ function FixtureHead2Head({ participants, league }: FixtureHead2HeadProps) {
           <div className="w-full">
             <div className="mb-4">
               <div className="flex h-[24px] w-1/3 mb-2">
-                <div className="h-full w-[24px] mr-2 animate-pulse bg-[#3f576c]"></div>
-                <div className="h-full w-full animate-pulse bg-[#3f576c]"></div>
+                <div className="h-full w-[24px] mr-2 animate-pulse bg-[#152420]"></div>
+                <div className="h-full w-full animate-pulse bg-[#152420]"></div>
               </div>
               {Array.from({ length: 2 }).map((item, index) => (
                 <div
                   key={`1-${index}`}
-                  className="bg-[#3f576c] animate-pulse h-[48px] md:h-[52px] w-full mb-1"
+                  className="bg-[#152420] animate-pulse h-[48px] md:h-[52px] w-full mb-1"
                 ></div>
               ))}
             </div>
 
             <div className="mb-4">
               <div className="flex h-[24px] w-1/3 mb-2">
-                <div className="h-full w-[24px] mr-2 animate-pulse bg-[#3f576c]"></div>
-                <div className="h-full w-full animate-pulse bg-[#3f576c]"></div>
+                <div className="h-full w-[24px] mr-2 animate-pulse bg-[#152420]"></div>
+                <div className="h-full w-full animate-pulse bg-[#152420]"></div>
               </div>
               {Array.from({ length: 3 }).map((item, index) => (
                 <div
                   key={`2-${index}`}
-                  className="bg-[#3f576c] animate-pulse h-[48px] md:h-[52px] w-full mb-1"
+                  className="bg-[#152420] animate-pulse h-[48px] md:h-[52px] w-full mb-1"
                 ></div>
               ))}
             </div>
           </div>
           <div className="w-full">
-            <div className="h-[20px] w-[100px] mx-auto mb-4 animate-pulse bg-[#3f576c]"></div>
+            <div className="h-[20px] w-[100px] mx-auto mb-4 animate-pulse bg-[#152420]"></div>
             <div className="flex h-[20px] w-full gap-1 mb-2">
-              <div className="h-full w-1/3 animate-pulse bg-[#3f576c]"></div>
-              <div className="h-full w-1/3 animate-pulse bg-[#3f576c]"></div>
-              <div className="h-full w-1/3 animate-pulse bg-[#3f576c]"></div>
+              <div className="h-full w-1/3 animate-pulse bg-[#152420]"></div>
+              <div className="h-full w-1/3 animate-pulse bg-[#152420]"></div>
+              <div className="h-full w-1/3 animate-pulse bg-[#152420]"></div>
             </div>
             <div className="flex h-[5px] w-full gap-1 mb-8">
-              <div className="h-full w-1/3 animate-pulse bg-[#3f576c]"></div>
-              <div className="h-full w-1/3 animate-pulse bg-[#3f576c]"></div>
-              <div className="h-full w-1/3 animate-pulse bg-[#3f576c]"></div>
+              <div className="h-full w-1/3 animate-pulse bg-[#152420]"></div>
+              <div className="h-full w-1/3 animate-pulse bg-[#152420]"></div>
+              <div className="h-full w-1/3 animate-pulse bg-[#152420]"></div>
             </div>
-            <div className="h-[1px] w-full mb-8 animate-pulse bg-[#3f576c] lg:hidden"></div>
+            <div className="h-[1px] w-full mb-8 animate-pulse bg-[#152420] lg:hidden"></div>
           </div>
         </div>
       )}

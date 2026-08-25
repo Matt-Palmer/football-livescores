@@ -7,7 +7,7 @@ import { getErrorMessage, isAbortError, postJson } from "@/services/Api";
 import { Fixture, League } from "@/typings";
 import { sportmonksCountries } from "@/utils/Sportmonks/Countries";
 import Breadcrumb from "@/components/Shared/Breadcrumb";
-import FixturesLeagueFixture from "@/components/Shared/FixturesLeagueFixture";
+import MatchCard from "@/components/Shared/MatchCard";
 
 type TeamResponse = {
   team: { id: number; name: string; image_path: string };
@@ -53,7 +53,7 @@ function TeamComponent({ teamId }: TeamComponentProps) {
       <main className="flex flex-col w-full px-4 mx-auto mb-16">
         <div className="text-center py-12">
           <p className="mb-2">Couldn&apos;t load this team.</p>
-          <p className="text-sm text-[rgba(255,255,255,0.6)]">{error}</p>
+          <p className="text-sm text-brand-muted">{error}</p>
         </div>
       </main>
     );
@@ -63,11 +63,11 @@ function TeamComponent({ teamId }: TeamComponentProps) {
     return (
       <main className="flex flex-col w-full px-4 mx-auto mb-16">
         <div className="max-w-[700px] m-auto w-full">
-          <div className="h-[60px] w-[60px] rounded-full mx-auto mb-6 animate-pulse bg-[#3f576c]"></div>
+          <div className="h-[60px] w-[60px] rounded-full mx-auto mb-6 animate-pulse bg-[#152420]"></div>
           {Array.from({ length: 8 }).map((item, index) => (
             <div
               key={index}
-              className="bg-[#3f576c] animate-pulse h-[48px] md:h-[52px] w-full mb-1"
+              className="bg-[#152420] animate-pulse h-[48px] md:h-[52px] w-full mb-1"
             ></div>
           ))}
         </div>
@@ -81,8 +81,8 @@ function TeamComponent({ teamId }: TeamComponentProps) {
     : "";
 
   return (
-    <main className="flex flex-col w-full px-4 mx-auto mb-16">
-      <div className="w-full max-w-[700px] mx-auto">
+    <main className="flex flex-col w-full px-4 md:px-6 mx-auto mb-16">
+      <div className="w-full max-w-[1200px] mx-auto">
         {data.league ? (
           <Breadcrumb
             countryId={data.league.country_id}
@@ -109,11 +109,13 @@ function TeamComponent({ teamId }: TeamComponentProps) {
         </div>
 
         {data.fixtures.length > 0 ? (
-          data.fixtures.map((fixture) => (
-            <FixturesLeagueFixture key={fixture.id} fixture={fixture} />
-          ))
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {data.fixtures.map((fixture) => (
+              <MatchCard key={fixture.id} fixture={fixture} />
+            ))}
+          </div>
         ) : (
-          <div className="text-center py-12 text-[rgba(255,255,255,0.6)]">
+          <div className="text-center py-12 text-brand-muted">
             No fixtures found for this team.
           </div>
         )}

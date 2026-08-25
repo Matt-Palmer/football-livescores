@@ -6,7 +6,7 @@ import Link from "next/link";
 import { getErrorMessage, isAbortError, postJson } from "@/services/Api";
 import { Fixture } from "@/typings";
 import { sportmonksCountries } from "@/utils/Sportmonks/Countries";
-import FixturesLeagueFixture from "@/components/Shared/FixturesLeagueFixture";
+import MatchCard from "@/components/Shared/MatchCard";
 import LogoBadge from "@/components/Shared/LogoBadge";
 
 type CountryLeague = {
@@ -58,22 +58,22 @@ function CountryComponent({ countryId }: CountryComponentProps) {
       ?.name ?? "";
 
   return (
-    <main className="flex flex-col w-full px-4 mx-auto mb-16">
-      <div className="w-full max-w-[700px] mx-auto">
+    <main className="flex flex-col w-full px-4 md:px-6 mx-auto mb-16">
+      <div className="w-full max-w-[1200px] mx-auto">
         <h1 className="text-xl md:text-2xl mb-6">{countryName}</h1>
 
         {error ? (
           <div className="text-center py-12">
             <p className="mb-2">Couldn&apos;t load leagues for this country.</p>
-            <p className="text-sm text-[rgba(255,255,255,0.6)]">{error}</p>
+            <p className="text-sm text-brand-muted">{error}</p>
           </div>
         ) : isLoading ? (
           <div>
-            <div className="h-[20px] w-1/3 mb-4 animate-pulse bg-[#3f576c]"></div>
+            <div className="h-[20px] w-1/3 mb-4 animate-pulse bg-[#152420]"></div>
             {Array.from({ length: 6 }).map((item, index) => (
               <div
                 key={index}
-                className="bg-[#3f576c] animate-pulse h-[48px] md:h-[52px] w-full mb-1"
+                className="bg-[#152420] animate-pulse h-[48px] md:h-[52px] w-full mb-1"
               ></div>
             ))}
           </div>
@@ -82,7 +82,7 @@ function CountryComponent({ countryId }: CountryComponentProps) {
             <div key={league.id} className="mb-8">
               <Link
                 href={`/League/${league.id}`}
-                className="flex items-center gap-4 mb-2 hover:text-[#EFEF3E]"
+                className="flex items-center gap-4 mb-3 hover:text-[#C9A15A]"
               >
                 <LogoBadge
                   src={league.image_path}
@@ -93,13 +93,15 @@ function CountryComponent({ countryId }: CountryComponentProps) {
                 <h2 className="md:text-lg">{league.name}</h2>
               </Link>
 
-              {league.fixtures.map((fixture) => (
-                <FixturesLeagueFixture key={fixture.id} fixture={fixture} />
-              ))}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {league.fixtures.map((fixture) => (
+                  <MatchCard key={fixture.id} fixture={fixture} />
+                ))}
+              </div>
             </div>
           ))
         ) : (
-          <div className="text-center py-12 text-[rgba(255,255,255,0.6)]">
+          <div className="text-center py-12 text-brand-muted">
             No leagues with upcoming fixtures right now.
           </div>
         )}

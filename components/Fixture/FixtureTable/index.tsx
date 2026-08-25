@@ -204,7 +204,7 @@ function FixtureTable({ fixture }: FixtureTableProps) {
       return "text-white bg-[rgba(255,255,255,0.1)] border-transparent";
     }
 
-    return "text-[rgba(255,255,255,0.6)] border-[rgba(255,255,255,0.1)]";
+    return "text-brand-muted border-[rgba(255,255,255,0.1)]";
   };
 
   const getDetail = (
@@ -223,7 +223,7 @@ function FixtureTable({ fixture }: FixtureTableProps) {
       {error ? (
         <div className="text-center py-8">
           <p className="mb-1">Couldn&apos;t load the league table.</p>
-          <p className="text-sm text-[rgba(255,255,255,0.6)]">{error}</p>
+          <p className="text-sm text-brand-muted">{error}</p>
         </div>
       ) : !isLoading ? (
         <div className="flex flex-col items-center">
@@ -246,7 +246,7 @@ function FixtureTable({ fixture }: FixtureTableProps) {
                 <p>{league.name}</p>
               </div>
 
-              <div className="text-center text-[rgba(255,255,255,0.6)] flex border-b-[1px] border-[rgba(255,255,255,0.1)]">
+              <div className="text-center text-brand-muted flex border-b-[1px] border-[rgba(255,255,255,0.1)]">
                 <span className="w-[30px] text-sm md:text-base py-2">#</span>
                 <span className="text-sm text-left md:text-base p-2 flex-1">
                   Team
@@ -329,7 +329,7 @@ function FixtureTable({ fixture }: FixtureTableProps) {
                   {legendEntries.map((entry) => (
                     <div
                       key={entry.colourClass}
-                      className="flex items-center gap-2 text-xs text-[rgba(255,255,255,0.6)]"
+                      className="flex items-center gap-2 text-xs text-brand-muted"
                     >
                       <span
                         className={`inline-block w-3 h-3 rounded-sm ${entry.colourClass}`}
@@ -346,13 +346,13 @@ function FixtureTable({ fixture }: FixtureTableProps) {
       ) : (
         <div className="max-w-[700px] m-auto">
           <div className="flex h-[24px] w-1/3 mb-2">
-            <div className="h-full w-[24px] mr-2 animate-pulse bg-[#3f576c]"></div>
-            <div className="h-full w-full animate-pulse bg-[#3f576c]"></div>
+            <div className="h-full w-[24px] mr-2 animate-pulse bg-[#152420]"></div>
+            <div className="h-full w-full animate-pulse bg-[#152420]"></div>
           </div>
           {Array.from({ length: 10 }).map((item, index) => (
             <div
               key={index}
-              className="bg-[#3f576c] animate-pulse h-[36px] md:h-[40px] w-full mb-1"
+              className="bg-[#152420] animate-pulse h-[36px] md:h-[40px] w-full mb-1"
             ></div>
           ))}
         </div>

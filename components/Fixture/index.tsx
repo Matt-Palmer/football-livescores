@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 
 import { isTabDisplayed } from "@/utils/individualFixtureHelpers";
@@ -19,25 +20,36 @@ type TabTitleProps = {
 function TabTitle({ title }: TabTitleProps) {
   return (
     <Tab
-      className={`data-[selected]:bg-[#EFEF3E] data-[selected]:text-black data-[selected]:outline-none h-[30px] md:h-[40px] px-6 flex-1 rounded-full`}
+      className={`data-[selected]:bg-[#C9A15A] data-[selected]:text-black data-[selected]:outline-none h-[30px] px-6 flex-1 rounded-lg text-sm`}
     >
       {title}
     </Tab>
   );
 }
 
-export default function FixtureComponent() {
+type FixtureComponentProps = {
+  /** Present only when rendered inside the split-view overlay: shows a
+   * "View full page" link below the score, and closes the overlay when
+   * that link (or anything else that should dismiss it) is used. */
+  onClose?: () => void;
+};
+
+export default function FixtureComponent({ onClose }: FixtureComponentProps) {
   const { fixture, isLoading, error, retry } = useFixtureContext();
 
   return (
-    <main className="flex flex-col w-full overflow-x-hidden px-4 mx-auto mb-16">
+    <main
+      className={`flex flex-col w-full overflow-x-hidden p-4 mx-auto mb-16 ${
+        onClose ? "pr-12" : ""
+      }`}
+    >
       {error ? (
         <div className="text-center py-12">
           <p className="mb-2">Couldn&apos;t load this fixture.</p>
-          <p className="text-sm text-[rgba(255,255,255,0.6)] mb-6">{error}</p>
+          <p className="text-sm text-brand-muted mb-6">{error}</p>
           <button
             onClick={retry}
-            className="bg-[#EFEF3E] text-black px-6 py-2 rounded-full"
+            className="bg-[#C9A15A] text-black px-6 py-2 rounded-full"
           >
             Try again
           </button>
@@ -46,15 +58,27 @@ export default function FixtureComponent() {
         <>
           <FixtureInformation fixture={fixture} />
 
+          {onClose && (
+            <div className="flex justify-center mb-8">
+              <Link
+                href={`/Fixture/${fixture.id}`}
+                onClick={onClose}
+                className="text-xs px-4 py-1.5 rounded-full border border-brand-border hover:border-brand-gold text-brand-muted hover:text-brand-gold transition-colors"
+              >
+                View full page
+              </Link>
+            </div>
+          )}
+
           <TabGroup>
             <TabList className="flex overflow-x-scroll pb-8 mt-8 mb-8 border-b-[1px] border-[rgba(255,255,255,0.3)]">
               {isTabDisplayed(fixture) && fixture.statistics.length > 0 ? (
-                <TabTitle title="Statistics" />
+                <TabTitle title="Statistics"/>
               ) : (
                 false
               )}
               {isTabDisplayed(fixture) && fixture.events.length > 0 ? (
-                <TabTitle title="Events" />
+                <TabTitle title="Events"/>
               ) : (
                 false
               )}
@@ -106,7 +130,7 @@ export default function FixtureComponent() {
           </TabGroup>
         </>
       ) : isLoading ? null : (
-        <div className="text-center py-12 text-[rgba(255,255,255,0.6)]">
+        <div className="text-center py-12 text-brand-muted">
           Fixture not found.
         </div>
       )}

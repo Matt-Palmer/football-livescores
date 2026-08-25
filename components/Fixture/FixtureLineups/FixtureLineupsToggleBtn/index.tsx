@@ -19,7 +19,7 @@ function LineupToggleBtn({
   const displayToggleButton = () => {
     const classNames = isHomeTeamDisplayed
       ? "bg-[#ffffff]/30 border-[#ffffff]"
-      : "bg-[#3f576c]/50 border-transparent";
+      : "bg-[#152420]/50 border-transparent";
 
     const participant = getParticipant(participants, participantLocation);
 

@@ -1,3 +1,37 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  /* Overwritten by Header once it measures its own rendered height. This
+     default only matters for the first paint before that runs. */
+  --header-height: 65px;
+}
+
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display), sans-serif;
+  }
+}
+
+* {
+  scrollbar-color: #28382f #0e1a14;
+  scrollbar-width: thin;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0e1a14;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #28382f;
+  border-radius: 4px;
+}

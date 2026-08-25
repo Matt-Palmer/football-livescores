@@ -8,33 +8,31 @@ import { isComplete, isHalfTime, isInplay } from "@/services/MatchStates";
 import { formatFixtureDateOrTime } from "@/services/Date";
 import { sportmonksStates } from "@/utils/Sportmonks/States";
 import { useFavouritesContext } from "@/hooks/useFavouritesContext";
+import { useSelectedFixtureContext } from "@/hooks/useSelectedFixtureContext";
+import { isPlainLeftClick } from "@/utils/isPlainLeftClick";
 import { Fixture } from "@/typings";
 
 import FixtureParticipant from "./FixtureParticipant";
+import LiveIndicator from "@/components/Shared/LiveIndicator";
 
 type Props = {
   fixture: Fixture;
+  isActive?: boolean;
 };
 
-function FixturesLeagueFixture({ fixture }: Props) {
+function FixturesLeagueFixture({ fixture, isActive }: Props) {
   const { starting_at_timestamp, id } = fixture;
   const { isFavourite, toggleFavourite } = useFavouritesContext();
+  const { openFixture } = useSelectedFixtureContext();
   const favourited = isFavourite(id);
 
   const displayMatchStatus = () => {
-    if (isHalfTime(fixture))
-      return (
-        <span className="text-[#ED3E42] text-xs">{getStateShortName()}</span>
-      );
+    if (isHalfTime(fixture)) return <LiveIndicator minute={null} label={getStateShortName()} />;
 
     if (isInplay(fixture)) {
       const currentPeriod = fixture.periods[fixture.periods.length - 1];
 
-      return (
-        <span className="text-[#ED3E42] text-xs">
-          {currentPeriod ? currentPeriod.minutes : 0}
-        </span>
-      );
+      return <LiveIndicator minute={currentPeriod ? currentPeriod.minutes : 0} />;
     }
 
     if (isComplete(fixture))
@@ -49,8 +47,12 @@ function FixturesLeagueFixture({ fixture }: Props) {
   };
 
   return (
-    <div className="mb-4">
-      <div className="flex">
+    <div className="mb-2">
+      <div
+        className={`flex items-stretch rounded-lg hover:bg-brand-surfaceHover ${
+          isActive ? "bg-brand-surfaceHover ring-1 ring-brand-gold/60" : ""
+        }`}
+      >
         <button
           type="button"
           onClick={() => toggleFavourite(id)}
@@ -61,23 +63,31 @@ function FixturesLeagueFixture({ fixture }: Props) {
           className="py-2 px-2 md:px-4 flex items-center"
         >
           {favourited ? (
-            <StarIconSolid width={15} height={15} color="#EFEF3E" />
+            <StarIconSolid width={15} height={15} color="#C9A15A" />
           ) : (
-            <StarIconOutline width={15} height={15} color="#ffffff" />
+            <StarIconOutline width={15} height={15} color="#8FA096" />
           )}
         </button>
-        <div className="w-[1px] bg-[#EFEF3E] opacity-40"></div>
+        <div className="w-[1px] bg-brand-border"></div>
         <div className="w-[50px] md:w-[70px] flex flex-col justify-center items-center font-light">
-          <span className="hidden md:block text-xs opacity-70 mb-1">
+          <span className="hidden md:block text-xs text-brand-muted mb-1">
             {formatFixtureDateOrTime(starting_at_timestamp, true)}
           </span>
-          <span className="md:hidden text-xs opacity-70 mb-1">
+          <span className="md:hidden text-xs text-brand-muted mb-1">
             {formatFixtureDateOrTime(starting_at_timestamp, false)}
           </span>
           {displayMatchStatus()}
         </div>
-        <div className="w-[1px] bg-[#EFEF3E] opacity-40"></div>
-        <Link href={`/Fixture/${id}`} className="flex flex-1 overflow-hidden">
+        <div className="w-[1px] bg-brand-border"></div>
+        <Link
+          href={`/Fixture/${id}`}
+          onClick={(event) => {
+            if (!isPlainLeftClick(event)) return;
+            event.preventDefault();
+            openFixture(id);
+          }}
+          className="flex flex-1 overflow-hidden"
+        >
           <div className="flex-1">
             <FixtureParticipant fixture={fixture} location={"home"} />
             <FixtureParticipant fixture={fixture} location={"away"} />

@@ -17,7 +17,7 @@ type BreadcrumbProps = {
 
 function Breadcrumb({ countryId, countryName, league }: BreadcrumbProps) {
   return (
-    <div className="flex items-center gap-2 text-gray-400 text-sm md:text-base flex-wrap">
+    <div className="flex items-center gap-2 text-gray-400 text-sm flex-wrap">
       <Link href={`/Country/${countryId}`} className="hover:text-white">
         {countryName}
       </Link>

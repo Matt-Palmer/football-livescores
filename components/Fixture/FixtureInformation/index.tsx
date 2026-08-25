@@ -40,18 +40,16 @@ function FixtureInformation({fixture}: FixtureInformationProps) {
         href={`/Team/${team?.id}`}
         className="flex flex-col items-center gap-2 flex-1"
       >
-        <div
-          className={`relative h-[60px] w-[60px] md:h-[90px] md:w-[90px] lg:h-[120px] lg:w-[120px]`}
-        >
+        <div className="relative h-[60px] w-[60px]">
           <Image
             src={team?.image_path || "/default-team-logo.svg"}
             fill={true}
             alt={`${location === "home" ? "Home" : "Away"} team logo`}
             style={{ objectFit: "cover" }}
-            sizes={`(max-width: 1200px) 120px, 120px`}
+            sizes="60px"
           />
         </div>
-        <span className="text-sm md:text-base text-center hover:text-[#EFEF3E]">
+        <span className="text-sm md:text-base text-center hover:text-[#C9A15A]">
           {team?.name}
         </span>
       </Link>
@@ -60,7 +58,7 @@ function FixtureInformation({fixture}: FixtureInformationProps) {
 
   return (
     <div key={fixture.id}>
-      <div className="mb-4">
+      <div className="mb-8">
         <Breadcrumb
           countryId={fixture.league.country_id}
           countryName={getCountryName()}
