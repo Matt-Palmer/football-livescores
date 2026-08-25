@@ -1,6 +1,6 @@
 "use client";
 
-import { Tab } from "@headlessui/react";
+import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 
 import { isTabDisplayed } from "@/utils/individualFixtureHelpers";
 
@@ -19,7 +19,7 @@ type TabTitleProps = {
 function TabTitle({ title }: TabTitleProps) {
   return (
     <Tab
-      className={`ui-selected:bg-[#EFEF3E] ui-selected:text-black ui-selected:outline-none h-[30px] md:h-[40px] px-6 flex-1 rounded-full`}
+      className={`data-[selected]:bg-[#EFEF3E] data-[selected]:text-black data-[selected]:outline-none h-[30px] md:h-[40px] px-6 flex-1 rounded-full`}
     >
       {title}
     </Tab>
@@ -46,8 +46,8 @@ export default function FixtureComponent() {
         <>
           <FixtureInformation fixture={fixture} />
 
-          <Tab.Group>
-            <Tab.List className="flex overflow-x-scroll pb-8 mt-8 mb-8 border-b-[1px] border-[rgba(255,255,255,0.3)]">
+          <TabGroup>
+            <TabList className="flex overflow-x-scroll pb-8 mt-8 mb-8 border-b-[1px] border-[rgba(255,255,255,0.3)]">
               {isTabDisplayed(fixture) && fixture.statistics.length > 0 ? (
                 <TabTitle title="Statistics" />
               ) : (
@@ -65,45 +65,45 @@ export default function FixtureComponent() {
               )}
               <TabTitle title="Table" />
               <TabTitle title="H2H" />
-            </Tab.List>
-            <Tab.Panels className="w-full">
+            </TabList>
+            <TabPanels className="w-full">
               {isTabDisplayed(fixture) && fixture.statistics.length > 0 ? (
-                <Tab.Panel>
+                <TabPanel>
                   <FixtureStatistics statistics={fixture.statistics} />
-                </Tab.Panel>
+                </TabPanel>
               ) : (
                 false
               )}
               {isTabDisplayed(fixture) && fixture.events.length > 0 ? (
-                <Tab.Panel>
+                <TabPanel>
                   <FixtureEvents
                     events={fixture.events}
                     participants={fixture.participants}
                     periods={fixture.periods}
                   />
-                </Tab.Panel>
+                </TabPanel>
               ) : (
                 false
               )}
               {isTabDisplayed(fixture) && fixture.lineups.length > 0 ? (
-                <Tab.Panel>
+                <TabPanel>
                   <FixtureLineups fixture={fixture} />
-                </Tab.Panel>
+                </TabPanel>
               ) : (
                 false
               )}
 
-              <Tab.Panel>
+              <TabPanel>
                 <FixtureTable fixture={fixture} />
-              </Tab.Panel>
-              <Tab.Panel>
+              </TabPanel>
+              <TabPanel>
                 <FixtureHead2Head
                   participants={fixture.participants}
                   league={fixture.league}
                 />
-              </Tab.Panel>
-            </Tab.Panels>
-          </Tab.Group>
+              </TabPanel>
+            </TabPanels>
+          </TabGroup>
         </>
       ) : isLoading ? null : (
         <div className="text-center py-12 text-[rgba(255,255,255,0.6)]">

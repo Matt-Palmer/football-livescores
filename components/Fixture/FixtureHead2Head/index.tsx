@@ -13,7 +13,7 @@ type FixtureHead2HeadProps = {
 
 function FixtureHead2Head({ participants, league }: FixtureHead2HeadProps) {
   const [previousFixtures, setPreviousFixtures] = useState<Fixture[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isFetching, setIsFetching] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   /*
@@ -29,11 +29,17 @@ function FixtureHead2Head({ participants, league }: FixtureHead2HeadProps) {
     (participant) => participant.meta.location === "away"
   )?.id;
 
+  /*
+    Derived rather than stored. The effect used to call setIsLoading(false)
+    synchronously when there were no team ids, which triggers a cascading
+    render; with the flag derived, the no-ids case simply never reads as
+    loading and the effect can return without touching state.
+  */
+  const canFetch = Boolean(homeTeamId && awayTeamId);
+  const isLoading = canFetch && isFetching;
+
   useEffect(() => {
-    if (!homeTeamId || !awayTeamId) {
-      setIsLoading(false);
-      return;
-    }
+    if (!canFetch) return;
 
     const controller = new AbortController();
 
@@ -52,11 +58,11 @@ function FixtureHead2Head({ participants, league }: FixtureHead2HeadProps) {
         setError(getErrorMessage(cause));
       })
       .finally(() => {
-        if (!controller.signal.aborted) setIsLoading(false);
+        if (!controller.signal.aborted) setIsFetching(false);
       });
 
     return () => controller.abort();
-  }, [homeTeamId, awayTeamId]);
+  }, [canFetch, homeTeamId, awayTeamId]);
 
   const getSummary = () => {
     let homeTeamWins = 0;

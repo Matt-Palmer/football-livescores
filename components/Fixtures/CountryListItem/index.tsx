@@ -1,6 +1,6 @@
 "use client";
 
-import { Disclosure } from "@headlessui/react";
+import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/react";
 
 import { Fixture } from "@/typings";
 import { sportmonksCountries } from "@/utils/Sportmonks/Countries";
@@ -61,7 +61,7 @@ const CountryListItem = () => {
               Object.keys(sortedFixtures).map((countryKey: string) => (
                 <Disclosure key={countryKey}>
                   <div className="mb-1 bg-[#3F576C] overflow-hidden">
-                    <Disclosure.Button className="p-2 md:p-4 flex items-center w-full gap-4 rounded-lg bg-[#3F576C]">
+                    <DisclosureButton className="p-2 md:p-4 flex items-center w-full gap-4 rounded-lg bg-[#3F576C]">
                       <div
                         className={`relative h-[25px] w-[25px] md:h-[30px] md:w-[30px] rounded-2xl overflow-hidden`}
                       >
@@ -78,13 +78,13 @@ const CountryListItem = () => {
                         />
                       </div>
                       <h2 className="md:text-lg">{countryKey}</h2>
-                    </Disclosure.Button>
-                    <Disclosure.Panel>
+                    </DisclosureButton>
+                    <DisclosurePanel>
                       <FixturesLeagueList
                         countryId={sortedFixtures[countryKey].id}
                         fixtures={fixtures}
                       />
-                    </Disclosure.Panel>
+                    </DisclosurePanel>
                   </div>
                 </Disclosure>
               ))

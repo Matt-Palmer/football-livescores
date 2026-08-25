@@ -44,11 +44,22 @@ export default function FixtureContextProvider({
     to be listed there, which meant every kickoff and final whistle destroyed
     and rebuilt the interval, firing an extra request each time.
   */
-  const fixtureRef = useRef<Fixture | null>(null);
-  fixtureRef.current = fixture;
+  const fixtureRef = useRef<Fixture | null>(fixture);
 
   const isInPlayRef = useRef<boolean>(isFixtureInPlay);
-  isInPlayRef.current = isFixtureInPlay;
+
+  /*
+    Synced in effects, not during render: under React 19 a discarded render
+    would otherwise leave these refs holding values from work that never
+    committed. Declared ahead of the interval effects so they run first.
+  */
+  useEffect(() => {
+    fixtureRef.current = fixture;
+  }, [fixture]);
+
+  useEffect(() => {
+    isInPlayRef.current = isFixtureInPlay;
+  }, [isFixtureInPlay]);
 
   const retry = useCallback(() => {
     setError(null);

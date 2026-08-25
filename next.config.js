@@ -1,13 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: [
-      "cdn.sportmonks.com",
-      "media.api-sports.io",
-      "media-1.api-sports.io",
-      "media-2.api-sports.io",
-      "media-3.api-sports.io",
-      "media-4.api-sports.io",
+    /*
+      `images.domains` was deprecated in Next 15 and removed in 16.
+      remotePatterns is stricter: it matches on protocol and path as well as
+      hostname, so it cannot be widened by accident.
+    */
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "cdn.sportmonks.com",
+        pathname: "/**",
+      },
     ],
   },
 };

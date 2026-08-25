@@ -49,8 +49,7 @@ export default function FixturesContextProvider({
     into the list as it stood when the interval started, quietly discarding
     scores. The ref always points at the latest list.
   */
-  const fixturesRef = useRef<Fixture[]>([]);
-  fixturesRef.current = fixtures;
+  const fixturesRef = useRef<Fixture[]>(fixtures);
 
   /*
     Likewise for the in-play flag. It is deliberately *not* an effect
@@ -58,7 +57,22 @@ export default function FixturesContextProvider({
     kickoff and full-time whistle, so polls were dropped or doubled up.
   */
   const fixturesInPlayRef = useRef<boolean>(fixturesInPlay);
-  fixturesInPlayRef.current = fixturesInPlay;
+
+  /*
+    Refs are synced in effects rather than assigned during render. Under React
+    19 a render can be discarded before it commits, and a ref written during
+    that render would keep a value from work that never happened.
+
+    Declared before the interval effects below so that on mount they run
+    first, and the timers never observe a stale ref.
+  */
+  useEffect(() => {
+    fixturesRef.current = fixtures;
+  }, [fixtures]);
+
+  useEffect(() => {
+    fixturesInPlayRef.current = fixturesInPlay;
+  }, [fixturesInPlay]);
 
   const retry = useCallback(() => {
     setError(null);
