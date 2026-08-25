@@ -1,4 +1,5 @@
 import FixturesLeagueFixture from "@/components/Shared/FixturesLeagueFixture";
+import { useFavouritesContext } from "@/hooks/useFavouritesContext";
 import { Fixture } from "@/typings";
 import Image from "next/image";
 
@@ -8,6 +9,8 @@ type Props = {
 };
 
 const FixturesLeagueList = ({ countryId, fixtures }: Props) => {
+  const { isFavourite } = useFavouritesContext();
+
   const displayLeagues = () => {
     const filteredFixtures = fixtures.filter(
       (fixture) => fixture.league.country_id === countryId
@@ -56,11 +59,14 @@ const FixturesLeagueList = ({ countryId, fixtures }: Props) => {
                 </h2>
               </div>
               <div>
-                {todaysFixturesNew[leagueKey].fixtures.map(
-                  (fixture: Fixture) => (
-                    <FixturesLeagueFixture key={fixture.id} fixture={fixture} />
+                {[...todaysFixturesNew[leagueKey].fixtures]
+                  .sort(
+                    (a: Fixture, b: Fixture) =>
+                      Number(isFavourite(b.id)) - Number(isFavourite(a.id))
                   )
-                )}
+                  .map((fixture: Fixture) => (
+                    <FixturesLeagueFixture key={fixture.id} fixture={fixture} />
+                  ))}
               </div>
             </div>
           ))}
