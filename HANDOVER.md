@@ -5,8 +5,7 @@ Next 16 upgrade, and favourites. Written so the next person or session can
 pick up without re-deriving decisions or re-discovering the traps.
 
 Covers work through `1515d01` on branch `feature/favourites`, **not yet
-merged**. A formatted version of this document lives at
-https://claude.ai/code/artifact/2cb6ee40-0128-4b47-b49e-7983521dcc61
+merged**.
 
 ---
 
