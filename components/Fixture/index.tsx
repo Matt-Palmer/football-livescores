@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 
 import { isTabDisplayed } from "@/utils/individualFixtureHelpers";
@@ -27,22 +26,11 @@ function TabTitle({ title }: TabTitleProps) {
   );
 }
 
-type FixtureComponentProps = {
-  /** Present only when rendered inside the split-view overlay: shows a
-   * "View full page" link below the score, and closes the overlay when
-   * that link (or anything else that should dismiss it) is used. */
-  onClose?: () => void;
-};
-
-export default function FixtureComponent({ onClose }: FixtureComponentProps) {
+export default function FixtureComponent() {
   const { fixture, isLoading, error, retry } = useFixtureContext();
 
   return (
-    <main
-      className={`flex flex-col w-full overflow-x-hidden p-4 mx-auto mb-16 ${
-        onClose ? "pr-12" : ""
-      }`}
-    >
+    <main className="flex flex-col w-full overflow-x-hidden p-4 mx-auto mb-16">
       {error ? (
         <div className="text-center py-12">
           <p className="mb-2">Couldn&apos;t load this fixture.</p>
@@ -57,18 +45,6 @@ export default function FixtureComponent({ onClose }: FixtureComponentProps) {
       ) : fixture ? (
         <>
           <FixtureInformation fixture={fixture} />
-
-          {onClose && (
-            <div className="flex justify-center mb-8">
-              <Link
-                href={`/Fixture/${fixture.id}`}
-                onClick={onClose}
-                className="text-xs px-4 py-1.5 rounded-full border border-brand-border hover:border-brand-gold text-brand-muted hover:text-brand-gold transition-colors"
-              >
-                View full page
-              </Link>
-            </div>
-          )}
 
           <TabGroup>
             <TabList className="flex overflow-x-scroll pb-8 mt-8 mb-8 border-b-[1px] border-[rgba(255,255,255,0.3)]">

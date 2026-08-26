@@ -108,7 +108,7 @@ function EventsListItem({ event, isHomeTeam }: Props) {
     }
   };
   return (
-    <div className="flex h-10 bg-[#152420] rounded-lg mb-2">
+    <div className="flex h-10 text-xs  rounded-lg mb-2">
       {isHomeTeam ? (
           <div className="flex items-center">
             {getEventTypeComponent(event)}

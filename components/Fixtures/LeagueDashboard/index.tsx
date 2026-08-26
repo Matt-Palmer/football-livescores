@@ -31,12 +31,19 @@ function LeagueDashboard() {
 
   if (isLoading) {
     return (
-      <div className="columns-1 md:columns-2 xl:columns-3 gap-4">
-        {Array.from({ length: 6 }).map((_, index) => (
-          <div
-            key={index}
-            className="rounded-lg bg-brand-surface animate-pulse h-[220px] mb-4 break-inside-avoid"
-          ></div>
+      <div className="flex flex-col gap-8">
+        {Array.from({ length: 3 }).map((_, index) => (
+          <div key={index}>
+            <div className="h-[22px] w-[160px] mb-3 rounded bg-brand-surface animate-pulse" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+              {Array.from({ length: 4 }).map((_, cardIndex) => (
+                <div
+                  key={cardIndex}
+                  className="rounded-lg bg-brand-surface animate-pulse h-[140px]"
+                ></div>
+              ))}
+            </div>
+          </div>
         ))}
       </div>
     );
@@ -55,7 +62,7 @@ function LeagueDashboard() {
   }
 
   return (
-    <div className="columns-1 md:columns-2 xl:columns-3 gap-4">
+    <div className="flex flex-col gap-8">
       {panels.map((panel) => (
         <LeaguePanel
           key={panel.key}

@@ -1,4 +1,5 @@
 import { BiFootball } from "react-icons/bi";
+import { GiRunningShoe } from "react-icons/gi";
 
 type Props = {
   isHomeTeam: boolean;
@@ -12,78 +13,91 @@ type Props = {
 
 function FixtureEventGoal({ isHomeTeam, player_name, result, related_player_name, type_id, minute, extra_minute }: Props) {
   return (
-    <>
-      {isHomeTeam ? (
-        <div className="flex items-center justify-start gap-4 px-4">
-          <div className="flex justify-center items-center">
-            <p>
-              {minute}
-              {extra_minute ? "+" + extra_minute : false}
-              {"'"}
-            </p>
-          </div>
-          <span className="flex justify-center items-center">
-            <BiFootball
-              className={`text-xl ${type_id === 15 ? "text-red-600" : ""}`}
-            />
-          </span>
-          <div>
-            <p className="text-sm leading-3">
-              {player_name ? player_name : "Goal"}
-            </p>
-            <div className="flex">
-              {related_player_name ? (
-                <p className="text-xs opacity-70 mr-1">
-                  Assist: {related_player_name} -
-                </p>
-              ) : (
-                false
-              )}
-              {result ? (
-                <p className="text-xs opacity-70">{result}</p>
-              ) : (
-                false
-              )}
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="flex items-center justify-start gap-4 px-4">
-          <div>
-            <p className="text-sm text-right leading-3">
-              {player_name ? player_name : "Goal"}
-            </p>
-            <div className="flex justify-end">
-              {related_player_name ? (
-                <p className="text-xs text-right opacity-70 mr-1">
-                  Assist: {related_player_name} -
-                </p>
-              ) : (
-                false
-              )}
-              {result ? (
-                <p className="text-xs opacity-70">{result}</p>
-              ) : (
-                false
-              )}
-            </div>
-          </div>
-          <span className="flex justify-center items-center">
-            <BiFootball
-              className={`text-xl ${type_id === 15 ? "text-red-600" : ""}`}
-            />
-          </span>
-          <div className="flex justify-center items-center">
-            <p>
-              {minute}
-              {extra_minute ? "+" + extra_minute : false}
-              {"'"}
-            </p>
-          </div>
-        </div>
-      )}
-    </>
-  );
+		<>
+			{isHomeTeam ? (
+				<div className="flex items-center justify-start gap-3 px-4">
+					<div className="flex flex-col justify-center items-center w-[30px]">
+						<span>{minute}</span>
+
+						{extra_minute ? (
+							<span className="opacity-70">+{extra_minute}</span>
+						) : (
+							false
+						)}
+					</div>
+
+					<div>
+						<p className="flex items-center gap-3 text-xs leading-3">
+							<span className="flex items-center gap-2">
+								<span className="flex justify-center items-center">
+									<BiFootball
+										className={`${type_id === 15 ? "text-red-600" : ""}`}
+									/>
+								</span>
+								<span>{player_name ? player_name : "Goal"}</span>
+							</span>
+							<span className="bg-slate-100 text-black text-[10px] font-bold px-2 py-[2px] rounded-full ">
+								{result ? result : false}
+							</span>
+						</p>
+						<div className="flex">
+							{related_player_name ? (
+								<p className="flex gap-2 text-xs opacity-50">
+									<span className="flex justify-center items-center">
+										<GiRunningShoe />
+									</span>
+									{related_player_name}
+								</p>
+							) : (
+								false
+							)}
+						</div>
+					</div>
+				</div>
+			) : (
+				<div className="flex items-center justify-start gap-3 px-4">
+					<div>
+						<p className="flex items-center gap-3 text-xs text-right leading-3">
+							<span className="bg-slate-100 text-black text-[10px] font-bold px-2 py-[2px] rounded-full ">
+								{result ? result : false}
+							</span>
+							<span className="flex items-center gap-2">
+								<span>{player_name ? player_name : "Goal"}</span>
+								<span className="flex justify-center items-center">
+									<BiFootball
+										className={`${type_id === 15 ? "text-red-600" : ""}`}
+									/>
+								</span>
+							</span>
+						</p>
+						<div className="flex justify-end">
+							{related_player_name ? (
+								<p className="flex gap-2 text-xs text-right opacity-50">
+									{related_player_name}{" "}
+									<span className="flex justify-center items-center">
+										<GiRunningShoe />
+									</span>
+								</p>
+							) : (
+								false
+							)}
+						</div>
+					</div>
+					<div className="flex justify-center items-center w-[30px]">
+						<div className="flex flex-col justify-center items-center w-[30px]">
+							<span>{minute}</span>
+
+							{extra_minute ? (
+								<span className="opacity-70">+{extra_minute}</span>
+							) : (
+								false
+							)}
+						</div>
+					</div>
+				</div>
+			)}
+		</>
+	);
 }
 
 export default FixtureEventGoal;

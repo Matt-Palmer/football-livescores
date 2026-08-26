@@ -68,7 +68,7 @@ function FavouritesComponent() {
             No favourites yet. Tap the star on any match to pin it here.
           </div>
         ) : isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
             {Array.from({ length: 6 }).map((_, index) => (
               <div
                 key={index}
@@ -92,7 +92,7 @@ function FavouritesComponent() {
                 />
                 <h2 className="md:text-lg">{panel.leagueName}</h2>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                 {panel.fixtures.map((fixture) => (
                   <MatchCard key={fixture.id} fixture={fixture} />
                 ))}

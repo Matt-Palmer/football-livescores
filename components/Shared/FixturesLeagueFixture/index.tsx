@@ -8,8 +8,6 @@ import { isComplete, isHalfTime, isInplay } from "@/services/MatchStates";
 import { formatFixtureDateOrTime } from "@/services/Date";
 import { sportmonksStates } from "@/utils/Sportmonks/States";
 import { useFavouritesContext } from "@/hooks/useFavouritesContext";
-import { useSelectedFixtureContext } from "@/hooks/useSelectedFixtureContext";
-import { isPlainLeftClick } from "@/utils/isPlainLeftClick";
 import { Fixture } from "@/typings";
 
 import FixtureParticipant from "./FixtureParticipant";
@@ -17,13 +15,11 @@ import LiveIndicator from "@/components/Shared/LiveIndicator";
 
 type Props = {
   fixture: Fixture;
-  isActive?: boolean;
 };
 
-function FixturesLeagueFixture({ fixture, isActive }: Props) {
+function FixturesLeagueFixture({ fixture }: Props) {
   const { starting_at_timestamp, id } = fixture;
   const { isFavourite, toggleFavourite } = useFavouritesContext();
-  const { openFixture } = useSelectedFixtureContext();
   const favourited = isFavourite(id);
 
   const displayMatchStatus = () => {
@@ -48,11 +44,7 @@ function FixturesLeagueFixture({ fixture, isActive }: Props) {
 
   return (
     <div className="mb-2">
-      <div
-        className={`flex items-stretch rounded-lg hover:bg-brand-surfaceHover ${
-          isActive ? "bg-brand-surfaceHover ring-1 ring-brand-gold/60" : ""
-        }`}
-      >
+      <div className="flex items-stretch rounded-lg hover:bg-brand-surfaceHover">
         <button
           type="button"
           onClick={() => toggleFavourite(id)}
@@ -79,15 +71,7 @@ function FixturesLeagueFixture({ fixture, isActive }: Props) {
           {displayMatchStatus()}
         </div>
         <div className="w-[1px] bg-brand-border"></div>
-        <Link
-          href={`/Fixture/${id}`}
-          onClick={(event) => {
-            if (!isPlainLeftClick(event)) return;
-            event.preventDefault();
-            openFixture(id);
-          }}
-          className="flex flex-1 overflow-hidden"
-        >
+        <Link href={`/Fixture/${id}`} className="flex flex-1 overflow-hidden">
           <div className="flex-1">
             <FixtureParticipant fixture={fixture} location={"home"} />
             <FixtureParticipant fixture={fixture} location={"away"} />

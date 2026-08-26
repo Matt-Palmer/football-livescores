@@ -29,48 +29,57 @@ function FixtureEventVAR({
     "Review";
 
   return (
-    <>
-      {isHomeTeam ? (
-        <div className="flex gap-4 px-4">
-          <div className="flex justify-center items-center">
-            <p>
-              {minute}
-              {extra_minute ? "+" + extra_minute : false}
-              {"'"}
-            </p>
-          </div>
-          <span className="flex justify-center items-center">
-            <MdMonitor />
-          </span>
-          <div>
-            <p className="text-sm leading-3">
-              {player_name ? player_name : "Goal"}
-            </p>
-            {result && <p className="text-xs opacity-70">VAR - {result}</p>}
-          </div>
-        </div>
-      ) : (
-        <div className="flex gap-4 px-4">
-          <div>
-            <p className="text-sm text-right leading-3">
-              {player_name ? player_name : "Goal"}
-            </p>
-            {result ? (<p className="text-xs text-right opacity-70">VAR - {result}</p>) : false}
-          </div>
-          <span className="flex justify-center items-center">
-            <MdMonitor />
-          </span>
-          <div className="flex justify-center items-center">
-            <p>
-              {minute}
-              {extra_minute ? "+" + extra_minute : false}
-              {"'"}
-            </p>
-          </div>
-        </div>
-      )}
-    </>
-  );
+		<>
+			{isHomeTeam ? (
+				<div className="flex gap-3 px-4">
+					<div className="flex justify-center items-center">
+						<div className="flex flex-col justify-center items-center w-[30px]">
+							<span>{minute}</span>
+
+							{extra_minute ? (
+								<span className="opacity-70">+{extra_minute}</span>
+							) : (
+								false
+							)}
+						</div>
+					</div>
+
+					<div>
+						<p className="flex items-center text-xs gap-2">
+							<span className="flex justify-center items-center">
+								<MdMonitor />
+							</span>
+							<span>{player_name ? player_name : "Goal"}</span>
+						</p>
+						{result && <p className="text-[10px] opacity-50">{result}</p>}
+					</div>
+				</div>
+			) : (
+				<div className="flex gap-3 px-4">
+					<div>
+						{result && <p className="text-[10px] opacity-50">{result}</p>}
+						<p className="flex items-center text-xs gap-2">
+							<span>{player_name ? player_name : "Goal"}</span>
+							<span className="flex justify-center items-center">
+								<MdMonitor />
+							</span>
+						</p>
+					</div>
+					<div className="flex justify-center items-center">
+						<div className="flex flex-col justify-center items-center w-[30px]">
+							<span>{minute}</span>
+
+							{extra_minute ? (
+								<span className="opacity-70">+{extra_minute}</span>
+							) : (
+								false
+							)}
+						</div>
+					</div>
+				</div>
+			)}
+		</>
+	);
 }
 
 export default FixtureEventVAR;

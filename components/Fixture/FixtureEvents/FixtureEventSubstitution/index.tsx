@@ -10,60 +10,64 @@ type Props = {
 };
 function FixtureEventSubstitution({ isHomeTeam, player_off_name, player_on_name, minute, extra_minute }: Props) {
   return (
-    <>
-      {isHomeTeam ? (
-        <div className="flex gap-4 px-4">
-          <div className="flex justify-center items-center">
-            <p>
-              {minute}
-              {extra_minute ? "+" + extra_minute : false}
-              {"'"}
-            </p>
-          </div>
+		<>
+			{isHomeTeam ? (
+				<div className="flex gap-3 px-4">
+					<div className="flex flex-col justify-center items-center w-[30px]">
+						<span>{minute}</span>
 
-          <span className="flex justify-center items-center">
+						{extra_minute ? (
+							<span className="opacity-70">+{extra_minute}</span>
+						) : (
+							false
+						)}
+					</div>
+
+					{/* <span className="flex justify-center items-center w-[30px]">
             <FaArrowsRotate className={`w-4`} />
-          </span>
+          </span> */}
 
-          <div>
-            <p className="flex items-center text-sm text-right leading-3">
-              <HiArrowSmUp className="text-green-500" />
-              {player_on_name}
-            </p>
-            <p className="flex items-center text-xs opacity-70">
-              <HiArrowSmDown className="text-red-500 h-4 w-4" />
-              {player_off_name}
-            </p>
-          </div>
-        </div>
-      ) : (
-        <div className="flex gap-4 px-4">
-          <div>
-            <p className="flex items-center justify-end text-sm text-right leading-3">
-              <HiArrowSmUp className="text-green-500" />
-              {player_on_name}
-            </p>
-            <p className="flex items-center justify-end text-xs opacity-70">
-              <HiArrowSmDown className="text-red-500 h-4 w-4" />
-              {player_off_name}
-            </p>
-          </div>
+					<div>
+						<p className="flex items-center gap-2 text-xs text-right">
+							<HiArrowSmUp className="text-green-500" />
+							{player_on_name}
+						</p>
+						<p className="flex items-center gap-2 text-xs opacity-50">
+							<HiArrowSmDown className="text-red-500" />
+							{player_off_name}
+						</p>
+					</div>
+				</div>
+			) : (
+				<div className="flex gap-3 px-4">
+					<div>
+						<p className="flex items-center justify-end gap-2 text-xs text-right">
+							{player_on_name}
+							<HiArrowSmUp className="text-green-500" />
+						</p>
+						<p className="flex items-center justify-end gap-2 text-xs opacity-50">
+							{player_off_name}
+							<HiArrowSmDown className="text-red-500" />
+						</p>
+					</div>
 
-          <span className="flex justify-center items-center">
+					{/* <span className="flex justify-center items-center">
             <FaArrowsRotate className={`w-4`} />
-          </span>
+          </span> */}
 
-          <div className="flex justify-center items-center">
-            <p>
-              {minute}
-              {extra_minute ? "+" + extra_minute : false}
-              {"'"}
-            </p>
-          </div>
-        </div>
-      )}
-    </>
-  );
+					<div className="flex flex-col justify-center items-center w-[30px]">
+						<span>{minute}</span>
+
+						{extra_minute ? (
+							<span className="opacity-70">+{extra_minute}</span>
+						) : (
+							false
+						)}
+					</div>
+				</div>
+			)}
+		</>
+	);
 }
 
 export default FixtureEventSubstitution;

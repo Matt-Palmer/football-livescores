@@ -9,37 +9,62 @@ export type LeaguePanelData = {
   fixtures: Fixture[];
 };
 
+// The handful of countries that stay pinned to the top of the page, in this
+// exact order, ahead of the alphabetical rest.
+const PRIORITY_COUNTRIES = [
+  "Europe",
+  "England",
+  "Spain",
+  "Germany",
+  "France",
+  "Italy",
+];
+
 /**
- * Groups fixtures into one panel per league, in leagueOrder's curated
- * country priority order — the same curation the old country accordion
- * applied, just flattened straight to league panels.
+ * Groups fixtures into one panel per league. Countries are ordered with the
+ * priority tier (Europe, England, Spain, Germany, France, Italy) first in
+ * that fixed order, then every other country that has fixtures today,
+ * alphabetically — including countries with no entry in leagueOrder at all,
+ * which used to be dropped from the page entirely.
+ *
+ * Within a country, leagues follow that country's curated order from
+ * leagueOrder where one exists (e.g. Premier League before Championship),
+ * with any leagues leagueOrder doesn't know about appended alphabetically
+ * after. A country with no curation at all just sorts its leagues
+ * alphabetically.
  */
 export function buildLeaguePanels(
   fixtures: Fixture[],
   isFavourite: (fixtureId: number) => boolean
 ): LeaguePanelData[] {
-  const fixturesByCountry = fixtures.reduce(
-    (acc: Record<string, Fixture[]>, fixture: Fixture) => {
-      const countryObj = sportmonksCountries.find(
-        (country) => country.id === fixture.league.country_id
-      );
+  const fixturesByCountry: Record<string, Fixture[]> = {};
 
-      if (!countryObj) return acc;
+  fixtures.forEach((fixture) => {
+    const countryObj = sportmonksCountries.find(
+      (country) => country.id === fixture.league.country_id
+    );
 
-      acc[countryObj.name] = acc[countryObj.name] || [];
-      acc[countryObj.name].push(fixture);
+    if (!countryObj) return;
 
-      return acc;
-    },
-    {}
+    fixturesByCountry[countryObj.name] = fixturesByCountry[countryObj.name] || [];
+    fixturesByCountry[countryObj.name].push(fixture);
+  });
+
+  const countriesWithFixtures = Object.keys(fixturesByCountry);
+
+  const priorityCountries = PRIORITY_COUNTRIES.filter((country) =>
+    countriesWithFixtures.includes(country)
   );
+  const remainingCountries = countriesWithFixtures
+    .filter((country) => !PRIORITY_COUNTRIES.includes(country))
+    .sort((a, b) => a.localeCompare(b));
+
+  const orderedCountries = [...priorityCountries, ...remainingCountries];
 
   const panels: LeaguePanelData[] = [];
 
-  leagueOrder.forEach(({ country }) => {
+  orderedCountries.forEach((country) => {
     const countryFixtures = fixturesByCountry[country];
-
-    if (!countryFixtures) return;
 
     const fixturesByLeague = countryFixtures.reduce(
       (acc: Record<string, LeaguePanelData>, fixture: Fixture) => {
@@ -60,10 +85,24 @@ export function buildLeaguePanels(
       {}
     );
 
-    Object.values(fixturesByLeague).forEach((panel) => {
+    const curatedLeagues =
+      leagueOrder.find((entry) => entry.country === country)?.leagues ?? [];
+    const leagueKeys = Object.keys(fixturesByLeague);
+
+    const curatedKeys = curatedLeagues.filter((name) =>
+      leagueKeys.includes(name)
+    );
+    const remainingKeys = leagueKeys
+      .filter((key) => !curatedKeys.includes(key))
+      .sort((a, b) => a.localeCompare(b));
+
+    [...curatedKeys, ...remainingKeys].forEach((leagueKey) => {
+      const panel = fixturesByLeague[leagueKey];
+
       panel.fixtures.sort(
         (a, b) => Number(isFavourite(b.id)) - Number(isFavourite(a.id))
       );
+
       panels.push(panel);
     });
   });

@@ -83,7 +83,7 @@ function FixtureStatistics({ statistics }: FixtureStatisticsProps) {
 
             return (
               <div key={category.label} className="mb-12">
-                <h3 className="text-sm md:text-base text-brand-muted uppercase tracking-wide mb-2">
+                <h3 className="text-sm text-brand-muted uppercase tracking-wide mb-2">
                   {category.label}
                 </h3>
                 {rows.map(({ stat, row }) => (
